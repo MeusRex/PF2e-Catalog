@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review Queue · Fantasy Image Catalog</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/review.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Quality control</p>
+      <h1>Review Queue</h1>
+    </div>
+    <nav class="topnav" aria-label="Catalog sections">
+      <a href="/">Gallery</a>
+      <a class="active" href="/review">Review queue</a>
+    </nav>
+  </header>
+
+  <main class="review-main">
+    <div id="review-message" class="message" hidden></div>
+    <section>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Overview</p>
+          <h2>Catalog health</h2>
+        </div>
+        <button id="refresh-review" type="button">Refresh</button>
+      </div>
+      <div id="summary-cards" class="summary-cards"></div>
+    </section>
+
+    <section class="review-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Batch processing</p>
+          <h2>Classification jobs</h2>
+        </div>
+        <div class="heading-actions">
+          <label>Show
+            <select id="job-status">
+              <option value="">All jobs</option>
+              <option value="pending">Pending</option>
+              <option value="running">Running</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+            </select>
+          </label>
+          <button id="run-one-job" type="button">Process one ready job</button>
+        </div>
+      </div>
+      <p class="section-help">Use the CLI to enqueue a directory. Processing one job may take several minutes while Ollama analyzes the image.</p>
+      <div id="job-list" class="queue-list"></div>
+    </section>
+
+    <section class="review-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Inference</p>
+          <h2>Failed classifications</h2>
+        </div>
+        <span id="failure-count" class="count-badge"></span>
+      </div>
+      <p class="section-help">Only the latest inference result for each image is shown. A successful retry removes it from this queue.</p>
+      <div id="failure-list" class="queue-list"></div>
+    </section>
+
+    <section class="review-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Taxonomy</p>
+          <h2>Suggested tags</h2>
+        </div>
+        <label>Show
+          <select id="suggestion-status">
+            <option value="pending">Pending</option>
+            <option value="mapped">Handled</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+      </div>
+      <p class="section-help">Suggestions never become canonical tags automatically. Mark them handled after mapping the concept to an existing tag, or reject concepts that should not enter the taxonomy.</p>
+      <div id="suggestion-list" class="queue-list"></div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<aside class="fic-details" data-application-part="details">
+  <label class="fic-target-select">
+    <span>Target actor</span>
+    <select name="targetActor">
+      <option value="">Select an actor…</option>
+      {{#each actors as |actor|}}
+        <option value="{{actor.id}}" {{#if actor.selected}}selected{{/if}}>{{actor.name}}</option>
+      {{/each}}
+    </select>
+  </label>
+
+  {{#if targetActor}}
+    <div class="fic-target">
+      <img src="{{targetActor.img}}" alt="{{targetActor.name}}">
+      <strong>{{targetActor.name}}</strong>
+    </div>
+  {{/if}}
+
+  {{#if selected}}
+    <figure class="fic-showcase">
+      <img src="{{selected.portrait}}" alt="{{selected.caption}}">
+      <button type="button" data-action="inspectImage" title="Inspect full image"><i class="fa-solid fa-magnifying-glass"></i></button>
+      <figcaption>{{selected.caption}}</figcaption>
+    </figure>
+    <div class="fic-selected-tags">
+      {{#each selected.tags as |tags category|}}
+        <section><strong>{{category}}</strong><span>{{#each tags as |tag|}}<i>{{tag}}</i>{{/each}}</span></section>
+      {{/each}}
+    </div>
+    <div class="fic-actions">
+      <button type="button" data-action="assignPortrait" {{#unless targetActor}}disabled{{/unless}}>
+        <i class="fa-solid fa-portrait"></i> {{localize "FIC.SetPortrait"}}
+      </button>
+      <button type="button" data-action="assignPortraitToken" {{#unless targetActor}}disabled{{/unless}}>
+        <i class="fa-solid fa-chess-pawn"></i> {{localize "FIC.SetPortraitToken"}}
+      </button>
+      {{#if canCreate}}
+        <button type="button" data-action="createActor"><i class="fa-solid fa-plus"></i> {{localize "FIC.CreateActor"}}</button>
+      {{/if}}
+    </div>
+  {{else}}
+    <p class="fic-empty">{{localize "FIC.NoSelection"}}</p>
+  {{/if}}
+</aside>

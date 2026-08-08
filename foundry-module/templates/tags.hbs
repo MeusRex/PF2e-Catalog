@@ -1,0 +1,18 @@
+<aside class="fic-tags" data-application-part="tags">
+  <header>
+    <h2>Filters</h2>
+    <button type="button" data-action="clearFilters"><i class="fa-solid fa-rotate-left"></i> Clear</button>
+  </header>
+  <div class="fic-tag-groups">
+    {{#each tagGroups as |group|}}
+      <details>
+        <summary>{{group.label}}</summary>
+        <div class="fic-tag-list">
+          {{#each group.values as |tag|}}
+            <button type="button" class="fic-tag" data-action="toggleTag" data-category="{{group.id}}" data-tag="{{tag.id}}">{{tag.label}}</button>
+          {{/each}}
+        </div>
+      </details>
+    {{/each}}
+  </div>
+</aside>

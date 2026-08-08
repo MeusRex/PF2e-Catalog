@@ -1,0 +1,49 @@
+{
+  "library": {
+    "roots": [
+      "D:/Fantasy Art"
+    ],
+    "extensions": [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".webp"
+    ],
+    "followSymlinks": false
+  },
+  "storage": {
+    "database": "./data/catalog.sqlite3",
+    "thumbnails": "./data/thumbnails",
+    "thumbnailMaxSize": 384
+  },
+  "ollama": {
+    "baseUrl": "http://127.0.0.1:11434/api",
+    "visionModel": "qwen3-vl:8b",
+    "requestTimeoutSeconds": 300,
+    "keepAlive": "10m"
+  },
+  "embedding": {
+    "model": "embeddinggemma",
+    "batchSize": 32,
+    "semanticCandidateLimit": 500
+  },
+  "classification": {
+    "promptVersion": "vision-v1",
+    "taxonomyFile": "./taxonomy/taxonomy.json",
+    "minimumConfidence": 0.55,
+    "reviewConfidence": 0.75,
+    "maximumInferenceDimension": 1280,
+    "maxAttempts": 3
+  },
+  "web": {
+    "host": "127.0.0.1",
+    "port": 8787
+  },
+  "foundry": {
+    "outputDirectory": "./data/foundry-export",
+    "buildDirectory": "./data/module-build",
+    "moduleId": "fantasy-image-catalog",
+    "assetBasePath": "modules/fantasy-image-catalog/generated",
+    "includeUnclassified": true
+  }
+}

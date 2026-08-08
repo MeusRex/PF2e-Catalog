@@ -1,0 +1,20 @@
+<section class="fic-grid-part" data-application-part="grid">
+  <div class="fic-grid">
+    {{#each displayData as |image|}}
+      <button
+        type="button"
+        class="fic-card"
+        data-action="selectImage"
+        data-id="{{image.id}}"
+        data-search="{{image.searchText}}"
+        data-tags="{{image.flatTags}}"
+        title="{{image.caption}}"
+      >
+        <img src="{{image.thumbnail}}" alt="{{image.caption}}" loading="lazy">
+        <span>{{image.caption}}</span>
+      </button>
+    {{else}}
+      <p class="fic-empty">{{localize "FIC.NoCatalog"}}</p>
+    {{/each}}
+  </div>
+</section>

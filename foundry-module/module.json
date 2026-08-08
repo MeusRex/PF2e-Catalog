@@ -1,0 +1,37 @@
+{
+  "id": "fantasy-image-catalog",
+  "title": "Fantasy Image Catalog",
+  "description": "Browse a locally generated fantasy-art catalog and assign portraits to Foundry actors and prototype tokens.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Local Catalog Owner"
+    }
+  ],
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "styles": [
+    "styles/gallery.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system",
+        "compatibility": {}
+      }
+    ]
+  }
+}

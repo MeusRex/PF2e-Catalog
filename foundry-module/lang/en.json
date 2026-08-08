@@ -1,0 +1,22 @@
+{
+  "FIC.Title": "Fantasy Image Catalog",
+  "FIC.Open": "Image Catalog",
+  "FIC.SetPortrait": "Set Portrait",
+  "FIC.SetPortraitToken": "Set Portrait & Token",
+  "FIC.CreateActor": "Create NPC",
+  "FIC.NoCatalog": "No generated catalog could be loaded. Run the catalog exporter and deploy its generated directory into this module.",
+  "FIC.NoSelection": "Select an image to inspect and assign it.",
+  "FIC.NoTarget": "Select a target actor first.",
+  "FIC.PermissionDenied": "You do not have permission to update that actor.",
+  "FIC.Assigned": "Artwork assigned to {actor}.",
+  "FIC.Created": "Created actor {actor}.",
+  "FIC.ConfirmTitle": "Replace Actor Artwork",
+  "FIC.Settings.Access.Name": "Gallery Access Permission",
+  "FIC.Settings.Access.Hint": "Minimum user role allowed to open the local image gallery.",
+  "FIC.Settings.Header.Name": "Actor Sheet Header Button",
+  "FIC.Settings.Header.Hint": "Show an Image Catalog button in actor-sheet headers.",
+  "FIC.Settings.ActorType.Name": "New Actor Type",
+  "FIC.Settings.ActorType.Hint": "Actor type used by the Create NPC action. PF2e normally uses npc.",
+  "FIC.Settings.CatalogPath.Name": "Catalog Path",
+  "FIC.Settings.CatalogPath.Hint": "Foundry-relative path to the generated catalog.json file."
+}

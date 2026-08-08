@@ -1,0 +1,19 @@
+{
+  "name": "fantasy-image-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first AI-assisted catalog for fantasy artwork",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "catalog": "node src/cli.js",
+    "test": "node --test",
+    "check": "node --check src/cli.js && node --check src/server.js && node --check web/app.js && node --check web/review.js && node --check foundry-module/scripts/main.mjs && node --check foundry-module/scripts/catalog.mjs && node --check foundry-module/scripts/gallery.mjs && node --check foundry-module/scripts/settings.mjs && node --check foundry-module/scripts/actor-art.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "11.8.1",
+    "sharp": "0.35.3"
+  }
+}

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fantasy Image Catalog</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Local collection</p>
+      <h1>Fantasy Image Catalog</h1>
+    </div>
+    <div class="search-wrap">
+      <label for="search">Search captions, filenames, and tags</label>
+      <div class="search-controls">
+        <input id="search" type="search" placeholder="stern dwarven priest" autocomplete="off">
+        <select id="search-mode" aria-label="Search mode">
+          <option value="keyword">Keyword</option>
+          <option value="semantic">Semantic</option>
+        </select>
+      </div>
+    </div>
+    <nav class="topnav" aria-label="Catalog sections">
+      <a class="active" href="/">Gallery</a>
+      <a href="/review">Review queue</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="filters" aria-label="Catalog filters">
+      <div class="filter-heading">
+        <h2>Filters</h2>
+        <button id="clear-filters" class="text-button" type="button">Clear</button>
+      </div>
+      <label class="select-label" for="review-status">Review status</label>
+      <select id="review-status">
+        <option value="">Any status</option>
+        <option value="unclassified">Unclassified</option>
+        <option value="classified">Classified</option>
+        <option value="needs_review">Needs review</option>
+        <option value="reviewed">Human reviewed</option>
+      </select>
+      <div id="taxonomy-filters"></div>
+    </aside>
+
+    <main>
+      <div class="results-toolbar">
+        <p id="result-count" aria-live="polite">Loading…</p>
+        <label>Sort
+          <select id="sort">
+            <option value="updated">Recently updated</option>
+            <option value="created">Recently added</option>
+            <option value="filename">Filename</option>
+            <option value="random">Random</option>
+          </select>
+        </label>
+      </div>
+      <div id="active-filters" class="active-filters" aria-label="Active filters"></div>
+      <div id="message" class="message" hidden></div>
+      <div id="gallery" class="gallery"></div>
+      <nav class="pagination" aria-label="Result pages">
+        <button id="previous-page" type="button">Previous</button>
+        <span id="page-label"></span>
+        <button id="next-page" type="button">Next</button>
+      </nav>
+    </main>
+  </div>
+
+  <dialog id="editor">
+    <form id="editor-form" method="dialog">
+      <div class="editor-grid">
+        <section class="preview-panel">
+          <img id="editor-image" alt="Selected catalog artwork">
+          <p id="editor-file" class="filename"></p>
+        </section>
+        <section class="editor-fields">
+          <div class="editor-title">
+            <div>
+              <p class="eyebrow">Human review</p>
+              <h2>Edit catalog entry</h2>
+            </div>
+            <button id="close-editor" class="icon-button" type="button" aria-label="Close">×</button>
+          </div>
+          <label for="caption">Caption</label>
+          <textarea id="caption" rows="4" required></textarea>
+          <p class="editor-help">Saving replaces model tags with this reviewed selection. Future AI runs will not overwrite it.</p>
+          <div id="editor-tags" class="editor-tags"></div>
+          <div class="editor-actions">
+            <span id="save-status" aria-live="polite"></span>
+            <button id="save-review" class="primary" type="submit">Save reviewed entry</button>
+          </div>
+        </section>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

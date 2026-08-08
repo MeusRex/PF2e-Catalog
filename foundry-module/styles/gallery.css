@@ -1,0 +1,66 @@
+.fantasy-image-catalog .window-content {
+  display: grid;
+  grid-template-columns: 220px minmax(360px, 1fr) 285px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "search grid details"
+    "tags grid details";
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.fantasy-image-catalog .fic-search { grid-area: search; padding: .75rem; border-right: 1px solid var(--color-border-light-primary); }
+.fantasy-image-catalog .fic-search label > span,
+.fantasy-image-catalog .fic-target-select > span { display: block; margin-bottom: .25rem; font-size: var(--font-size-12); font-weight: 600; }
+.fantasy-image-catalog .fic-search input { width: 100%; }
+.fantasy-image-catalog .fic-results { margin-top: .5rem; color: var(--color-text-subtle); font-size: var(--font-size-12); }
+.fantasy-image-catalog .fic-filter-help { margin: .55rem 0 0; color: var(--color-text-subtle); font-size: var(--font-size-11); line-height: 1.3; }
+
+.fantasy-image-catalog .fic-tags { grid-area: tags; min-height: 0; overflow: auto; padding: .75rem; border-top: 1px solid var(--color-border-light-primary); border-right: 1px solid var(--color-border-light-primary); }
+.fantasy-image-catalog .fic-tags > header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.fantasy-image-catalog .fic-tags h2 { margin: 0; font-size: var(--font-size-16); }
+.fantasy-image-catalog .fic-tags header button { width: auto; font-size: var(--font-size-11); }
+.fantasy-image-catalog .fic-tags details { padding: .45rem 0; border-bottom: 1px solid var(--color-border-light-primary); }
+.fantasy-image-catalog .fic-tags summary { cursor: pointer; font-weight: 600; }
+.fantasy-image-catalog .fic-tag-list { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .4rem; }
+.fantasy-image-catalog button.fic-tag { width: auto; min-height: 0; padding: .18rem .4rem; border-radius: 999px; font-size: var(--font-size-11); line-height: 1.2; }
+.fantasy-image-catalog button.fic-tag.include { border-color: #3e9258; background: rgb(48 115 69 / 38%); }
+.fantasy-image-catalog button.fic-tag.exclude { border-color: #ad4c42; background: rgb(132 48 40 / 38%); text-decoration: line-through; }
+
+.fantasy-image-catalog .fic-grid-part { grid-area: grid; min-width: 0; overflow: auto; padding: .75rem; }
+.fantasy-image-catalog .fic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .65rem; }
+.fantasy-image-catalog .fic-card { display: grid; grid-template-rows: 170px auto; min-width: 0; height: auto; padding: 0; overflow: hidden; border: 1px solid var(--color-border-light-primary); border-radius: .45rem; background: rgb(0 0 0 / 14%); text-align: left; }
+.fantasy-image-catalog .fic-card:hover,
+.fantasy-image-catalog .fic-card.selected { border-color: var(--color-border-highlight); box-shadow: 0 0 0 1px var(--color-border-highlight); }
+.fantasy-image-catalog .fic-card[hidden] { display: none; }
+.fantasy-image-catalog .fic-card img { width: 100%; height: 170px; border: 0; object-fit: contain; background: rgb(0 0 0 / 32%); }
+.fantasy-image-catalog .fic-card span { display: -webkit-box; min-height: 3.3em; padding: .4rem; overflow: hidden; font-size: var(--font-size-11); line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+.fantasy-image-catalog .fic-details { grid-area: details; min-height: 0; overflow: auto; padding: .75rem; border-left: 1px solid var(--color-border-light-primary); }
+.fantasy-image-catalog .fic-target-select select { width: 100%; }
+.fantasy-image-catalog .fic-target { display: flex; align-items: center; gap: .5rem; margin-top: .55rem; padding: .4rem; border: 1px solid var(--color-border-light-primary); border-radius: .35rem; }
+.fantasy-image-catalog .fic-target img { width: 38px; height: 38px; border: 0; border-radius: .25rem; object-fit: cover; }
+.fantasy-image-catalog .fic-showcase { position: relative; margin: .75rem 0; }
+.fantasy-image-catalog .fic-showcase > img { display: block; width: 100%; height: 330px; border: 0; object-fit: contain; background: rgb(0 0 0 / 32%); }
+.fantasy-image-catalog .fic-showcase > button { position: absolute; top: .4rem; right: .4rem; width: 2rem; height: 2rem; padding: 0; }
+.fantasy-image-catalog .fic-showcase figcaption { margin-top: .5rem; font-size: var(--font-size-12); line-height: 1.35; }
+.fantasy-image-catalog .fic-selected-tags { display: grid; gap: .35rem; }
+.fantasy-image-catalog .fic-selected-tags section { display: grid; grid-template-columns: 85px 1fr; gap: .4rem; font-size: var(--font-size-11); }
+.fantasy-image-catalog .fic-selected-tags strong { overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
+.fantasy-image-catalog .fic-selected-tags span { display: flex; flex-wrap: wrap; gap: .2rem; }
+.fantasy-image-catalog .fic-selected-tags i { border-radius: 999px; background: rgb(0 0 0 / 18%); padding: .1rem .35rem; font-style: normal; }
+.fantasy-image-catalog .fic-actions { display: grid; gap: .4rem; margin-top: .75rem; }
+.fantasy-image-catalog .fic-empty { padding: 1rem; color: var(--color-text-subtle); text-align: center; }
+.fic-confirm-images { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .75rem; }
+.fic-confirm-images figure { margin: 0; text-align: center; }
+.fic-confirm-images img { width: 100%; height: 190px; object-fit: contain; }
+
+@media (max-width: 850px) {
+  .fantasy-image-catalog .window-content {
+    grid-template-columns: 185px minmax(300px, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "search grid" "tags grid" "details details";
+  }
+  .fantasy-image-catalog .fic-details { max-height: 310px; border-top: 1px solid var(--color-border-light-primary); border-left: 0; }
+}
