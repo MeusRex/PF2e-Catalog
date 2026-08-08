@@ -171,6 +171,15 @@ export function createCatalogServer(app) {
         sendJson(response, 200, result);
         return;
       }
+      if (request.method === "DELETE" && url.pathname === "/api/jobs/pending") {
+        sendJson(response, 200, app.database.deletePendingClassificationJobs());
+        return;
+      }
+      const jobRoute = url.pathname.match(/^\/api\/jobs\/(\d+)$/);
+      if (jobRoute && request.method === "DELETE") {
+        sendJson(response, 200, app.database.deletePendingClassificationJob(Number(jobRoute[1])));
+        return;
+      }
       if (request.method === "POST" && url.pathname === "/api/jobs/run-one") {
         const recovered = app.database.recoverStaleClassificationJobs();
         const result = await app.processNextJob();
@@ -259,6 +268,13 @@ export function createCatalogServer(app) {
         }
         const result = await app.indexFile(image.current_path, { force: true });
         sendJson(response, 200, { ...result, image: result.image ? publicImage(result.image) : undefined });
+        return;
+      }
+
+      const reevaluateRoute = url.pathname.match(/^\/api\/images\/(\d+)\/re-evaluate$/);
+      if (reevaluateRoute && request.method === "POST") {
+        const result = await app.enqueueReevaluation(Number(reevaluateRoute[1]));
+        sendJson(response, 202, { ...result, image: result.image ? publicImage(result.image) : undefined });
         return;
       }
 

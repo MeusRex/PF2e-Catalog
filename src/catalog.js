@@ -24,13 +24,13 @@ export class CatalogApp {
     };
   }
 
-  async indexFile(filePath, { force = false } = {}) {
+  async indexFile(filePath, { force = false, overwriteHumanReview = false } = {}) {
     const prepared = await prepareImage(filePath, this.config);
     const imageId = this.database.upsertPreparedImage(prepared.record);
     const versions = this.versions();
 
-    if (!force && this.database.hasCurrentClassification(imageId, versions)) {
-      return { skipped: true, reason: "current classification already exists", image: this.database.getImageSummary(imageId) };
+    if (!force && this.database.hasBeenHandled(imageId)) {
+      return { skipped: true, reason: "image has already been handled", image: this.database.getImageSummary(imageId) };
     }
 
     const metadata = {
@@ -45,7 +45,7 @@ export class CatalogApp {
         client: this.client,
       });
       metadata.request = { ...metadata.request, ...result.requestMetadata };
-      this.database.persistClassification(imageId, metadata, result.raw, result.normalized, this.taxonomy, result.durationMs);
+      this.database.persistClassification(imageId, metadata, result.raw, result.normalized, this.taxonomy, result.durationMs, { overwriteHumanReview });
       return { skipped: false, image: this.database.getImageSummary(imageId), warnings: result.normalized.warnings };
     } catch (error) {
       this.database.recordFailedInference(imageId, metadata, error.message, error.durationMs ?? null);
@@ -53,25 +53,33 @@ export class CatalogApp {
     }
   }
 
-  async enqueueFile(filePath, { force = false } = {}) {
+  async enqueueFile(filePath, { force = false, reEvaluation = false } = {}) {
     const prepared = await prepareImage(filePath, this.config);
     const imageId = this.database.upsertPreparedImage(prepared.record);
     const versions = this.versions();
-    if (!force && this.database.hasCurrentClassification(imageId, versions)) {
-      return { enqueued: false, skipped: true, reason: "current classification already exists", imageId };
+    if (!force && this.database.hasBeenHandled(imageId)) {
+      return { enqueued: false, skipped: true, reason: "image has already been handled", imageId };
     }
     const result = this.database.enqueueClassification(imageId, versions, {
       force,
       maxAttempts: this.config.classification.maxAttempts,
+      reEvaluation,
     });
     return { ...result, skipped: !result.enqueued, imageId };
+  }
+
+  async enqueueReevaluation(imageId) {
+    const image = this.database.getImageSummary(imageId);
+    if (!image) throw new Error(`Image ${imageId} does not exist`);
+    const result = await this.enqueueFile(image.current_path, { force: true, reEvaluation: true });
+    return { ...result, image: this.database.getImageSummary(imageId) };
   }
 
   async processNextJob() {
     const job = this.database.claimNextClassificationJob(this.versions());
     if (!job) return null;
     try {
-      const result = await this.indexFile(job.current_path, { force: true });
+      const result = await this.indexFile(job.current_path, { force: true, overwriteHumanReview: Boolean(job.re_evaluation) });
       const completed = this.database.completeClassificationJob(job.id);
       return { job: completed, result, outcome: "completed" };
     } catch (error) {

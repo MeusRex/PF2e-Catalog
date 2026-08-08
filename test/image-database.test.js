@@ -40,6 +40,7 @@ test("image preparation and database insertion are idempotent", async () => {
     const firstId = database.upsertPreparedImage(prepared.record);
     const secondId = database.upsertPreparedImage(prepared.record);
     assert.equal(firstId, secondId);
+    assert.equal(database.hasBeenHandled(firstId), false);
     assert.deepEqual(database.getStatus(), {
       images: 1,
       classified: 0,
@@ -88,6 +89,7 @@ test("image preparation and database insertion are idempotent", async () => {
     assert.equal(reviewed.review_status, "reviewed");
     assert.equal(reviewed.tags.length, 2);
     assert.ok(reviewed.tags.every((tag) => tag.source === "human"));
+    assert.equal(database.hasBeenHandled(firstId), true);
 
     const textResult = database.listImages({ query: "purple fantasy" });
     assert.equal(textResult.total, 1);
@@ -111,6 +113,15 @@ test("image preparation and database insertion are idempotent", async () => {
     assert.equal(preserved.caption, reviewed.caption);
     assert.deepEqual(preserved.tags.map((tag) => tag.tag).sort(), ["character", "purple"]);
 
+    database.persistClassification(firstId, {
+      model: "test-model", promptVersion: "test-prompt", taxonomyVersion: taxonomy.version, request: { explicit: true },
+    }, {}, {
+      caption: "An explicitly re-evaluated red character.", visibleFeatures: ["red"],
+      acceptedTags: [{ category: "dominant_color", tag: "red", confidence: 0.99, evidence: "Test", needsReview: false }],
+      suggestedTags: [],
+    }, taxonomy, 1, { overwriteHumanReview: true });
+    assert.equal(database.getImageSummary(firstId).caption, "An explicitly re-evaluated red character.");
+
     database.recordFailedInference(firstId, {
       model: "test-model",
       promptVersion: "test-prompt",
@@ -129,6 +140,13 @@ test("image preparation and database insertion are idempotent", async () => {
     database.updateTagSuggestion(suggestions.items[0].id, "rejected");
     assert.equal(database.listTagSuggestions().total, 0);
     assert.equal(database.listTagSuggestions({ status: "rejected" }).total, 1);
+
+    database.enqueueClassification(firstId, { ...versions, taxonomyVersion: "orphaned-version" });
+    const orphaned = database.listClassificationJobs({ status: "pending" }).items.find((job) => job.taxonomy_version === "orphaned-version");
+    assert.equal(database.deletePendingClassificationJob(orphaned.id).removed, 1);
+    database.enqueueClassification(firstId, { ...versions, taxonomyVersion: "old-a" });
+    database.enqueueClassification(firstId, { ...versions, taxonomyVersion: "old-b" });
+    assert.ok(database.deletePendingClassificationJobs().removed >= 2);
   } finally {
     database.close();
   }

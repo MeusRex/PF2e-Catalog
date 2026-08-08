@@ -48,7 +48,7 @@ npm run catalog -- check
 npm run catalog -- index "D:\Fantasy Art\example.webp"
 ```
 
-Running the command again skips vision inference if the image already has a successful result for the configured model, prompt, and taxonomy versions. Use `--force` to reclassify it:
+Running the command again skips vision inference once an image has already been classified or human-reviewed, even if the taxonomy later changes. Use `--force` or **Queue AI re-evaluation** in the image editor to classify it again deliberately:
 
 ```powershell
 npm run catalog -- index "D:\Fantasy Art\example.webp" --force
@@ -110,7 +110,7 @@ The **Review queue** page shows catalog health, images whose latest Ollama reque
 
 The **Taxonomy** page edits category labels and limits, creates and edits tags, manages aliases and descriptions, and links narrow tags to broader tags with `implies`. For example, `magic_theme:fire_magic` can imply `element:fire`; filtering for Fire then includes images explicitly tagged Fire Magic. Tags with assignments can be merged into another canonical tag. Every edit is validated for missing references, duplicate aliases, and relationship cycles, saved atomically, and increments the taxonomy version. Taxonomy edits invalidate semantic vectors; run `npm run catalog -- embed` afterward to rebuild them.
 
-It also displays persistent batch jobs. The **Process one ready job** control is useful for supervised testing; use `npm run catalog -- work` for unattended batches.
+It also displays persistent batch jobs. The **Process one ready job** control is useful for supervised testing; use `npm run catalog -- work` for unattended batches. Pending jobs can be removed individually or cleared in bulk; running and completed jobs are protected.
 
 ## Semantic search
 

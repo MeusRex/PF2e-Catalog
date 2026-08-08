@@ -59,6 +59,10 @@ test("gallery API searches, serves cataloged images, and saves review edits", as
       if (!job) return null;
       return { job: database.completeClassificationJob(job.id), outcome: "completed" };
     },
+    enqueueReevaluation: async (requestedImageId) => ({
+      enqueued: true,
+      image: database.getImageSummary(requestedImageId),
+    }),
     searchImages: async (options) => database.listImages(options),
   });
   await new Promise((resolve, reject) => {
@@ -98,6 +102,10 @@ test("gallery API searches, serves cataloged images, and saves review edits", as
     assert.equal(reviewed.caption, "A reviewed blue martial artist.");
     assert.deepEqual(reviewed.tags.map((tag) => tag.tag).sort(), ["character", "martial_artist"]);
 
+    const reevaluate = await fetch(`${baseUrl}/api/images/${imageId}/re-evaluate`, { method: "POST" });
+    assert.equal(reevaluate.status, 202);
+    assert.equal((await reevaluate.json()).enqueued, true);
+
     const suggestions = await fetch(`${baseUrl}/api/review/suggestions`).then((response) => response.json());
     assert.equal(suggestions.total, 1);
     assert.equal(suggestions.items[0].thumbnail_path, undefined);
@@ -115,6 +123,11 @@ test("gallery API searches, serves cataloged images, and saves review edits", as
     const runOne = await fetch(`${baseUrl}/api/jobs/run-one`, { method: "POST" });
     assert.equal(runOne.status, 200);
     assert.equal((await runOne.json()).result.outcome, "completed");
+
+    database.enqueueClassification(imageId, { ...versions, taxonomyVersion: "stale-pending" });
+    const removePending = await fetch(`${baseUrl}/api/jobs/pending`, { method: "DELETE" });
+    assert.equal(removePending.status, 200);
+    assert.equal((await removePending.json()).removed, 1);
 
     const retry = await fetch(`${baseUrl}/api/images/${imageId}/reclassify`, { method: "POST" });
     assert.equal(retry.status, 200);

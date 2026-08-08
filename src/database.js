@@ -94,6 +94,7 @@ export class CatalogDatabase {
         status TEXT NOT NULL DEFAULT 'pending',
         attempts INTEGER NOT NULL DEFAULT 0,
         max_attempts INTEGER NOT NULL DEFAULT 3,
+        re_evaluation INTEGER NOT NULL DEFAULT 0,
         available_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         started_at TEXT,
         completed_at TEXT,
@@ -135,6 +136,8 @@ export class CatalogDatabase {
     const suggestionColumns = new Set(this.db.prepare("PRAGMA table_info(tag_suggestions)").all().map((column) => column.name));
     if (!suggestionColumns.has("mapped_category")) this.db.exec("ALTER TABLE tag_suggestions ADD COLUMN mapped_category TEXT");
     if (!suggestionColumns.has("mapped_tag")) this.db.exec("ALTER TABLE tag_suggestions ADD COLUMN mapped_tag TEXT");
+    const jobColumns = new Set(this.db.prepare("PRAGMA table_info(classification_jobs)").all().map((column) => column.name));
+    if (!jobColumns.has("re_evaluation")) this.db.exec("ALTER TABLE classification_jobs ADD COLUMN re_evaluation INTEGER NOT NULL DEFAULT 0");
   }
 
   upsertPreparedImage(image) {
@@ -175,6 +178,11 @@ export class CatalogDatabase {
     `).get(imageId, versions.model, versions.promptVersion, versions.taxonomyVersion));
   }
 
+  hasBeenHandled(imageId) {
+    const image = this.db.prepare("SELECT review_status FROM images WHERE id = ?").get(imageId);
+    return Boolean(image && image.review_status !== "unclassified");
+  }
+
   recordFailedInference(imageId, metadata, error, durationMs) {
     this.db.prepare(`
       INSERT INTO inference_runs
@@ -184,7 +192,7 @@ export class CatalogDatabase {
       JSON.stringify(metadata.request), durationMs, String(error));
   }
 
-  persistClassification(imageId, metadata, rawResponse, normalized, taxonomy, durationMs) {
+  persistClassification(imageId, metadata, rawResponse, normalized, taxonomy, durationMs, { overwriteHumanReview = false } = {}) {
     const transaction = this.db.transaction(() => {
       this.db.prepare(`
         INSERT INTO inference_runs
@@ -194,7 +202,7 @@ export class CatalogDatabase {
         JSON.stringify(metadata.request), JSON.stringify(rawResponse), durationMs);
 
       const current = this.db.prepare("SELECT review_status FROM images WHERE id = ?").get(imageId);
-      if (current?.review_status === "reviewed") {
+      if (current?.review_status === "reviewed" && !overwriteHumanReview) {
         this.refreshSearchDocument(imageId);
         return;
       }
@@ -518,27 +526,30 @@ export class CatalogDatabase {
     };
   }
 
-  enqueueClassification(imageId, versions, { force = false, maxAttempts = 3 } = {}) {
+  enqueueClassification(imageId, versions, { force = false, maxAttempts = 3, reEvaluation = false } = {}) {
     const existing = this.db.prepare(`
       SELECT * FROM classification_jobs
       WHERE image_id = ? AND model = ? AND prompt_version = ? AND taxonomy_version = ?
     `).get(imageId, versions.model, versions.promptVersion, versions.taxonomyVersion);
-    if (existing && !force && ["pending", "running", "completed"].includes(existing.status)) {
+    if (existing?.status === "running") {
+      return { job: existing, enqueued: false, reason: "classification is already running" };
+    }
+    if (existing && !force && ["pending", "completed"].includes(existing.status)) {
       return { job: existing, enqueued: false };
     }
     if (existing) {
       this.db.prepare(`
-        UPDATE classification_jobs SET status = 'pending', attempts = 0, max_attempts = ?,
+        UPDATE classification_jobs SET status = 'pending', attempts = 0, max_attempts = ?, re_evaluation = ?,
           available_at = CURRENT_TIMESTAMP, started_at = NULL, completed_at = NULL,
           last_error = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-      `).run(maxAttempts, existing.id);
+      `).run(maxAttempts, reEvaluation ? 1 : 0, existing.id);
       return { job: this.getClassificationJob(existing.id), enqueued: true };
     }
     const result = this.db.prepare(`
       INSERT INTO classification_jobs
-        (image_id, model, prompt_version, taxonomy_version, max_attempts)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(imageId, versions.model, versions.promptVersion, versions.taxonomyVersion, maxAttempts);
+        (image_id, model, prompt_version, taxonomy_version, max_attempts, re_evaluation)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(imageId, versions.model, versions.promptVersion, versions.taxonomyVersion, maxAttempts, reEvaluation ? 1 : 0);
     return { job: this.getClassificationJob(Number(result.lastInsertRowid)), enqueued: true };
   }
 
@@ -624,6 +635,18 @@ export class CatalogDatabase {
       ORDER BY job.updated_at DESC, job.id DESC LIMIT ? OFFSET ?
     `).all(...parameters, safePageSize, (safePage - 1) * safePageSize);
     return { items, total, page: safePage, pageSize: safePageSize, pages: Math.ceil(total / safePageSize) };
+  }
+
+  deletePendingClassificationJob(jobId) {
+    const job = this.getClassificationJob(jobId);
+    if (!job) throw new Error(`Classification job ${jobId} does not exist`);
+    if (job.status !== "pending") throw new Error(`Only pending jobs can be removed; job ${jobId} is ${job.status}`);
+    this.db.prepare("DELETE FROM classification_jobs WHERE id = ? AND status = 'pending'").run(jobId);
+    return { removed: 1, id: jobId };
+  }
+
+  deletePendingClassificationJobs() {
+    return { removed: this.db.prepare("DELETE FROM classification_jobs WHERE status = 'pending'").run().changes };
   }
 
   listFailedInferences({ page = 1, pageSize = 25 } = {}) {

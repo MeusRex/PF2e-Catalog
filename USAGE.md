@@ -116,13 +116,13 @@ You do not need to remove processed images from the source folders.
 
 Normal repeated runs of `queue` and `work`:
 
-- Skip unchanged images that already have a current successful classification.
+- Skip images that have already been classified or human-reviewed, regardless of later taxonomy changes.
 - Do not create duplicate pending jobs.
 - Recognize an image by its SHA-256 content hash, even if it was renamed or moved.
 - Treat a genuinely edited image as new content.
 - Retry failed jobs up to `classification.maxAttempts`, with a delay between attempts.
 
-The current classification is specific to the configured model, prompt version, and taxonomy version. Changing one of those versions allows a new classification job to be created.
+Model, prompt, and taxonomy versions remain recorded for auditing. Version changes do not automatically make handled images eligible again; use `--force` or **Queue AI re-evaluation** in the image editor when you intentionally want a fresh current-version classification.
 
 To deliberately reclassify discovered images, use:
 
@@ -169,6 +169,8 @@ The browser interface supports:
 - Suggestion mapping to existing or newly created canonical tags
 
 Saving an image in the review editor makes its corrected caption and tags authoritative. Later AI classifications remain in the audit history but do not overwrite human-reviewed metadata.
+
+The image editor can explicitly queue an AI re-evaluation. The Review queue can remove individual pending jobs or all pending work; it never removes running or completed jobs.
 
 Use the **Taxonomy** page to define aliases and `implies` relationships. An image tagged with a narrow tag automatically matches filters for every broader tag it implies, and inherited tags are included in Foundry exports. Taxonomy changes increment its version and invalidate existing semantic vectors, so run `npm run catalog -- embed` after wrangling changes.
 

@@ -4,6 +4,7 @@ const elements = {
   summary: document.querySelector("#summary-cards"),
   jobStatus: document.querySelector("#job-status"),
   runOneJob: document.querySelector("#run-one-job"),
+  removePendingJobs: document.querySelector("#remove-pending-jobs"),
   jobs: document.querySelector("#job-list"),
   failureCount: document.querySelector("#failure-count"),
   failures: document.querySelector("#failure-list"),
@@ -87,8 +88,36 @@ function jobRow(item) {
   open.href = `/?q=${encodeURIComponent(item.filename)}`;
   open.textContent = "View image";
   actions.append(open);
+  if (item.status === "pending") {
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "danger-button";
+    remove.textContent = "Remove pending job";
+    remove.addEventListener("click", () => removePendingJob(item));
+    actions.append(remove);
+  }
   row.append(queueImage(item), content, actions);
   return row;
+}
+
+async function removePendingJob(item) {
+  if (!confirm(`Remove the pending classification for ${item.filename}?`)) return;
+  try {
+    await api(`/api/jobs/${item.id}`, { method: "DELETE" });
+    showMessage(`Removed pending work for ${item.filename}.`);
+    await Promise.all([loadSummary(), loadJobs()]);
+  } catch (error) { showMessage(error.message, true); }
+}
+
+async function removeAllPendingJobs() {
+  if (!confirm("Remove every pending classification job? Running and completed work will not be affected.")) return;
+  elements.removePendingJobs.disabled = true;
+  try {
+    const result = await api("/api/jobs/pending", { method: "DELETE" });
+    showMessage(`Removed ${result.removed} pending job${result.removed === 1 ? "" : "s"}.`);
+    await Promise.all([loadSummary(), loadJobs()]);
+  } catch (error) { showMessage(error.message, true); }
+  finally { elements.removePendingJobs.disabled = false; }
 }
 
 async function loadJobs() {
@@ -321,6 +350,7 @@ async function loadAll() {
 elements.refresh.addEventListener("click", loadAll);
 elements.jobStatus.addEventListener("change", loadJobs);
 elements.runOneJob.addEventListener("click", runOneJob);
+elements.removePendingJobs.addEventListener("click", removeAllPendingJobs);
 elements.suggestionStatus.addEventListener("change", loadSuggestions);
 elements.suggestionAction.addEventListener("change", toggleSuggestionAction);
 elements.suggestionForm.addEventListener("submit", mapSuggestion);

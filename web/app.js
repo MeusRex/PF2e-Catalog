@@ -32,6 +32,7 @@ const elements = {
   editorTags: document.querySelector("#editor-tags"),
   closeEditor: document.querySelector("#close-editor"),
   saveStatus: document.querySelector("#save-status"),
+  queueReevaluation: document.querySelector("#queue-reevaluation"),
 };
 
 async function api(url, options) {
@@ -249,6 +250,19 @@ elements.clearFilters.addEventListener("click", () => {
 elements.previousPage.addEventListener("click", () => { if (state.page > 1) { state.page -= 1; loadImages(); } });
 elements.nextPage.addEventListener("click", () => { if (state.page < state.pages) { state.page += 1; loadImages(); } });
 elements.closeEditor.addEventListener("click", () => elements.editor.close());
+elements.queueReevaluation.addEventListener("click", async () => {
+  if (!state.currentImage) return;
+  elements.queueReevaluation.disabled = true;
+  elements.saveStatus.textContent = "Queuing…";
+  try {
+    const result = await api(`/api/images/${state.currentImage.id}/re-evaluate`, { method: "POST" });
+    elements.saveStatus.textContent = result.enqueued ? "AI re-evaluation queued" : (result.reason ?? "Re-evaluation already queued");
+  } catch (error) {
+    elements.saveStatus.textContent = error.message;
+  } finally {
+    elements.queueReevaluation.disabled = false;
+  }
+});
 
 async function initialize() {
   try {

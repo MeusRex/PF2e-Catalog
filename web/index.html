@@ -78,6 +78,7 @@
           <p id="editor-file" class="filename"></p>
         </section>
         <section class="editor-fields">
+          <div class="editor-scroll">
           <div class="editor-title">
             <div>
               <p class="eyebrow">Human review</p>
@@ -89,8 +90,10 @@
           <textarea id="caption" rows="4" required></textarea>
           <p class="editor-help">Saving replaces model tags with this reviewed selection. Future AI runs will not overwrite it.</p>
           <div id="editor-tags" class="editor-tags"></div>
+          </div>
           <div class="editor-actions">
             <span id="save-status" aria-live="polite"></span>
+            <button id="queue-reevaluation" type="button">Queue AI re-evaluation</button>
             <button id="save-review" class="primary" type="submit">Save reviewed entry</button>
           </div>
         </section>

@@ -7,7 +7,7 @@ const taxonomy = loadTaxonomy(path.resolve("taxonomy/taxonomy.json"));
 
 test("taxonomy loads and produces a strict schema", () => {
   const schema = buildInferenceSchema(taxonomy);
-  assert.equal(taxonomy.version, "1.0.0");
+  assert.match(taxonomy.version, /^\d+\.\d+\.\d+$/);
   assert.ok(schema.properties.tags.items.properties.category.enum.includes("morphology"));
   assert.ok(schema.properties.tags.items.properties.tag.enum.includes("canine"));
   assert.equal(schema.additionalProperties, false);
@@ -63,17 +63,17 @@ test("low-confidence tags remain observations rather than accepted tags", () => 
 
 test("aliases and implications are described to the model and implication closure expands filters", () => {
   const edited = structuredClone(taxonomy);
-  edited.categories.magic_theme.values.fire_magic = {
-    label: "Fire Magic",
-    aliases: ["pyromancy"],
+  edited.categories.magic_theme.values.test_arcane_flame = {
+    label: "Test Arcane Flame",
+    aliases: ["test pyromancy"],
     description: "Visible supernatural flame or heat.",
     implies: ["element:fire"],
   };
   validateTaxonomy(edited);
-  assert.deepEqual(impliedTagKeys(edited, "magic_theme", "fire_magic"), ["magic_theme:fire_magic", "element:fire"]);
-  assert.ok(tagsMatchingFilter(edited, "element", "fire").some((item) => item.category === "magic_theme" && item.tag === "fire_magic"));
+  assert.deepEqual(impliedTagKeys(edited, "magic_theme", "test_arcane_flame"), ["magic_theme:test_arcane_flame", "element:fire"]);
+  assert.ok(tagsMatchingFilter(edited, "element", "fire").some((item) => item.category === "magic_theme" && item.tag === "test_arcane_flame"));
   const prompt = taxonomyForPrompt(edited);
-  assert.match(prompt, /Aliases: pyromancy/);
+  assert.match(prompt, /Aliases: test pyromancy/);
   assert.match(prompt, /Implies: element:fire/);
   assert.match(prompt, /Visible supernatural flame/);
 });

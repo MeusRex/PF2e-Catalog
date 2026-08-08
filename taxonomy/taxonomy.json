@@ -1,5 +1,5 @@
 {
-  "version": "1.0.14",
+  "version": "1.0.18",
   "categories": {
     "subject_type": {
       "label": "Subject Type",
@@ -839,13 +839,16 @@
           "label": "Tattoo",
           "aliases": [
             "face_paint",
-            "war_paint"
+            "war_paint",
+            "clock_tattoo"
           ],
           "implies": []
         },
         "blindfold": {
           "label": "blindfold",
-          "aliases": [],
+          "aliases": [
+            "veil"
+          ],
           "implies": []
         }
       }

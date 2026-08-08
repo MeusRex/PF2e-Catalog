@@ -43,12 +43,13 @@
           <label>Show
             <select id="job-status">
               <option value="">All jobs</option>
-              <option value="pending">Pending</option>
+              <option value="pending" selected>Pending</option>
               <option value="running">Running</option>
               <option value="completed">Completed</option>
               <option value="failed">Failed</option>
             </select>
           </label>
+          <button id="remove-pending-jobs" class="danger-button" type="button">Remove all pending work</button>
           <button id="run-one-job" type="button">Process one ready job</button>
         </div>
       </div>
@@ -90,9 +91,9 @@
     <form id="suggestion-form">
       <div class="editor-title"><div><p class="eyebrow">Suggested concept</p><h2 id="suggestion-dialog-title">Map suggestion</h2></div><button id="close-suggestion-dialog" class="icon-button" type="button" aria-label="Close">×</button></div>
       <label>Action<select id="suggestion-action"><option value="existing">Map to existing tag</option><option value="create">Create canonical tag</option></select></label>
-      <div id="existing-tag-fields"><label>Canonical tag<select id="suggestion-target"></select></label><label class="check-row"><input id="suggestion-alias" type="checkbox" checked> Add the suggested wording as an alias</label></div>
+      <div id="existing-tag-fields"><label>Canonical tag<select id="suggestion-target"></select></label><label class="check-label check-row"><input id="suggestion-alias" type="checkbox" checked> <span>Add the suggested wording as an alias</span></label></div>
       <div id="new-tag-fields" hidden><label>Category<select id="suggestion-category"></select></label><label>Stable ID<input id="suggestion-id" pattern="[a-z][a-z0-9_]*"></label><label>Display label<input id="suggestion-label"></label><label>Aliases<input id="suggestion-aliases" placeholder="comma, separated"></label><label>Broader tags<select id="suggestion-implies" multiple size="6"></select></label></div>
-      <label class="check-row"><input id="suggestion-apply" type="checkbox" checked> Apply the canonical tag to this image</label>
+      <label class="check-label check-row"><input id="suggestion-apply" type="checkbox" checked> <span>Apply the canonical tag to this image</span></label>
       <div class="editor-actions"><button class="primary" type="submit">Confirm mapping</button></div>
     </form>
   </dialog>
