@@ -10,7 +10,7 @@
   "scripts": {
     "catalog": "node src/cli.js",
     "test": "node --test",
-    "check": "node --check src/cli.js && node --check src/server.js && node --check web/app.js && node --check web/review.js && node --check foundry-module/scripts/main.mjs && node --check foundry-module/scripts/catalog.mjs && node --check foundry-module/scripts/gallery.mjs && node --check foundry-module/scripts/settings.mjs && node --check foundry-module/scripts/actor-art.mjs"
+    "check": "node --check src/cli.js && node --check src/server.js && node --check src/taxonomy.js && node --check web/app.js && node --check web/review.js && node --check web/taxonomy.js && node --check foundry-module/scripts/main.mjs && node --check foundry-module/scripts/catalog.mjs && node --check foundry-module/scripts/gallery.mjs && node --check foundry-module/scripts/settings.mjs && node --check foundry-module/scripts/actor-art.mjs"
   },
   "dependencies": {
     "better-sqlite3": "11.8.1",

@@ -7,6 +7,7 @@ import sharp from "sharp";
 import { CatalogDatabase } from "../src/database.js";
 import { prepareImage } from "../src/image.js";
 import { loadTaxonomy } from "../src/taxonomy.js";
+import { tagsMatchingFilter } from "../src/taxonomy.js";
 
 test("image preparation and database insertion are idempotent", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "fantasy-catalog-image-"));
@@ -128,6 +129,36 @@ test("image preparation and database insertion are idempotent", async () => {
     database.updateTagSuggestion(suggestions.items[0].id, "rejected");
     assert.equal(database.listTagSuggestions().total, 0);
     assert.equal(database.listTagSuggestions({ status: "rejected" }).total, 1);
+  } finally {
+    database.close();
+  }
+});
+
+test("aliases, implied parents, and mapped suggestions work without replacing other tags", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "fantasy-catalog-wrangling-"));
+  const database = new CatalogDatabase(path.join(directory, "catalog.sqlite3"));
+  const taxonomy = loadTaxonomy(path.resolve("taxonomy/taxonomy.json"));
+  taxonomy.categories.magic_theme.values.fire_magic = {
+    label: "Fire Magic", aliases: ["pyromancy"], implies: ["element:fire"],
+  };
+  database.syncTaxonomy(taxonomy);
+  try {
+    const imageId = database.upsertPreparedImage({ sha256: "a".repeat(64), perceptualHash: "b".repeat(16),
+      path: path.join(directory, "image.png"), filename: "image.png", extension: ".png", width: 10, height: 10,
+      fileSize: 1, modifiedAt: new Date(0).toISOString(), thumbnailPath: path.join(directory, "thumb.webp") });
+    database.updateHumanReview(imageId, { caption: "A wizard conjures supernatural flames.", tags: [
+      { category: "subject_type", tag: "character" }, { category: "magic_theme", tag: "fire_magic" },
+    ] }, taxonomy);
+    assert.equal(database.listImages({ query: "pyromancy" }).total, 1);
+    const matches = tagsMatchingFilter(taxonomy, "element", "fire");
+    assert.equal(database.listImages({ tags: [{ category: "element", tag: "fire", matches }] }).total, 1);
+
+    const suggestionId = Number(database.db.prepare(`INSERT INTO tag_suggestions
+      (image_id, label, suggested_category, reason) VALUES (?, 'red hue', 'dominant_color', '')`).run(imageId).lastInsertRowid);
+    database.mapTagSuggestion(suggestionId, "dominant_color", "red", taxonomy);
+    const image = database.getImageSummary(imageId);
+    assert.deepEqual(image.tags.map((item) => item.tag).sort(), ["character", "fire_magic", "red"]);
+    assert.equal(database.listTagSuggestions({ status: "mapped" }).items[0].mapped_tag, "red");
   } finally {
     database.close();
   }

@@ -1,212 +1,853 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.14",
   "categories": {
     "subject_type": {
       "label": "Subject Type",
       "maximumTags": 2,
       "values": {
-        "character": { "label": "Character", "aliases": ["person", "npc"] },
-        "creature": { "label": "Creature", "aliases": ["monster", "beast"] },
-        "group": { "label": "Group", "aliases": ["party", "crowd"] },
-        "mount": { "label": "Mount", "aliases": ["steed"] },
-        "object": { "label": "Object", "aliases": ["item"] },
-        "scene": { "label": "Scene", "aliases": ["landscape", "location"] }
+        "character": {
+          "label": "Character",
+          "aliases": [
+            "person",
+            "npc"
+          ]
+        },
+        "creature": {
+          "label": "Creature",
+          "aliases": [
+            "monster",
+            "beast"
+          ]
+        },
+        "group": {
+          "label": "Group",
+          "aliases": [
+            "party",
+            "crowd"
+          ]
+        },
+        "mount": {
+          "label": "Mount",
+          "aliases": [
+            "steed"
+          ]
+        },
+        "object": {
+          "label": "Object",
+          "aliases": [
+            "item"
+          ]
+        },
+        "scene": {
+          "label": "Scene",
+          "aliases": [
+            "landscape",
+            "location"
+          ]
+        }
       }
     },
     "ancestry_candidate": {
       "label": "Ancestry Candidate",
       "maximumTags": 2,
       "values": {
-        "human": { "label": "Human", "aliases": [] },
-        "elf": { "label": "Elf", "aliases": ["elven"] },
-        "dwarf": { "label": "Dwarf", "aliases": ["dwarven"] },
-        "gnome": { "label": "Gnome", "aliases": [] },
-        "halfling": { "label": "Halfling", "aliases": [] },
-        "goblin": { "label": "Goblin", "aliases": [] },
-        "orc": { "label": "Orc", "aliases": ["orcish"] },
-        "leshy": { "label": "Leshy", "aliases": ["plant person"] },
-        "beastkin": { "label": "Beastkin", "aliases": ["werecreature", "shifter"] },
-        "catfolk": { "label": "Catfolk", "aliases": ["feline humanoid"] },
-        "kholo": { "label": "Kholo", "aliases": ["gnoll", "hyena person"] },
-        "kobold": { "label": "Kobold", "aliases": [] },
-        "lizardfolk": { "label": "Lizardfolk", "aliases": ["iruxi"] },
-        "ratfolk": { "label": "Ratfolk", "aliases": ["ysoki"] },
-        "tengu": { "label": "Tengu", "aliases": ["bird person"] },
-        "undead": { "label": "Undead", "aliases": [] },
-        "construct": { "label": "Construct", "aliases": ["automaton"] },
-        "fiend": { "label": "Fiend", "aliases": ["demon", "devil"] },
-        "dragon": { "label": "Dragon", "aliases": ["draconic"] },
-        "unknown": { "label": "Unknown", "aliases": ["uncertain"] }
+        "human": {
+          "label": "Human",
+          "aliases": []
+        },
+        "elf": {
+          "label": "Elf",
+          "aliases": [
+            "elven"
+          ]
+        },
+        "dwarf": {
+          "label": "Dwarf",
+          "aliases": [
+            "dwarven"
+          ]
+        },
+        "gnome": {
+          "label": "Gnome",
+          "aliases": []
+        },
+        "halfling": {
+          "label": "Halfling",
+          "aliases": []
+        },
+        "goblin": {
+          "label": "Goblin",
+          "aliases": []
+        },
+        "orc": {
+          "label": "Orc",
+          "aliases": [
+            "orcish"
+          ]
+        },
+        "leshy": {
+          "label": "Leshy",
+          "aliases": [
+            "plant person"
+          ]
+        },
+        "beastkin": {
+          "label": "Beastkin",
+          "aliases": [
+            "werecreature",
+            "shifter"
+          ]
+        },
+        "catfolk": {
+          "label": "Catfolk",
+          "aliases": [
+            "feline humanoid",
+            "feline_humanoid"
+          ]
+        },
+        "kholo": {
+          "label": "Kholo",
+          "aliases": [
+            "gnoll",
+            "hyena person"
+          ]
+        },
+        "kobold": {
+          "label": "Kobold",
+          "aliases": []
+        },
+        "lizardfolk": {
+          "label": "Lizardfolk",
+          "aliases": [
+            "iruxi"
+          ]
+        },
+        "ratfolk": {
+          "label": "Ratfolk",
+          "aliases": [
+            "ysoki"
+          ]
+        },
+        "tengu": {
+          "label": "Tengu",
+          "aliases": [
+            "bird person"
+          ]
+        },
+        "undead": {
+          "label": "Undead",
+          "aliases": []
+        },
+        "construct": {
+          "label": "Construct",
+          "aliases": [
+            "automaton"
+          ]
+        },
+        "fiend": {
+          "label": "Fiend",
+          "aliases": [
+            "demon",
+            "devil",
+            "fiend-like features"
+          ]
+        },
+        "dragon": {
+          "label": "Dragon",
+          "aliases": [
+            "draconic"
+          ]
+        },
+        "unknown": {
+          "label": "Unknown",
+          "aliases": [
+            "uncertain"
+          ]
+        }
       }
     },
     "morphology": {
       "label": "Morphology",
       "maximumTags": 8,
       "values": {
-        "humanoid": { "label": "Humanoid", "aliases": [] },
-        "canine": { "label": "Canine", "aliases": ["wolf-like", "dog-like", "lupine"] },
-        "feline": { "label": "Feline", "aliases": ["cat-like"] },
-        "avian": { "label": "Avian", "aliases": ["bird-like"] },
-        "reptilian": { "label": "Reptilian", "aliases": ["lizard-like"] },
-        "insectoid": { "label": "Insectoid", "aliases": ["insect-like"] },
-        "plant": { "label": "Plant", "aliases": ["vegetation"] },
-        "skeletal": { "label": "Skeletal", "aliases": ["skeleton"] },
-        "fur": { "label": "Fur", "aliases": ["furry"] },
-        "scales": { "label": "Scales", "aliases": ["scaled"] },
-        "wings": { "label": "Wings", "aliases": ["winged"] },
-        "horns": { "label": "Horns", "aliases": ["horned"] },
-        "tail": { "label": "Tail", "aliases": ["tailed"] }
+        "humanoid": {
+          "label": "Humanoid",
+          "aliases": []
+        },
+        "canine": {
+          "label": "Canine",
+          "aliases": [
+            "wolf-like",
+            "dog-like",
+            "lupine"
+          ]
+        },
+        "feline": {
+          "label": "Feline",
+          "aliases": [
+            "cat-like"
+          ]
+        },
+        "avian": {
+          "label": "Avian",
+          "aliases": [
+            "bird-like"
+          ]
+        },
+        "reptilian": {
+          "label": "Reptilian",
+          "aliases": [
+            "lizard-like"
+          ]
+        },
+        "insectoid": {
+          "label": "Insectoid",
+          "aliases": [
+            "insect-like"
+          ]
+        },
+        "plant": {
+          "label": "Plant",
+          "aliases": [
+            "vegetation"
+          ]
+        },
+        "skeletal": {
+          "label": "Skeletal",
+          "aliases": [
+            "skeleton"
+          ]
+        },
+        "fur": {
+          "label": "Fur",
+          "aliases": [
+            "furry"
+          ]
+        },
+        "scales": {
+          "label": "Scales",
+          "aliases": [
+            "scaled"
+          ]
+        },
+        "wings": {
+          "label": "Wings",
+          "aliases": [
+            "winged"
+          ]
+        },
+        "horns": {
+          "label": "Horns",
+          "aliases": [
+            "horned"
+          ]
+        },
+        "tail": {
+          "label": "Tail",
+          "aliases": [
+            "tailed"
+          ]
+        }
       }
     },
     "apparent_role": {
       "label": "Apparent Role",
       "maximumTags": 3,
       "values": {
-        "warrior": { "label": "Warrior", "aliases": ["fighter", "soldier"] },
-        "martial_artist": { "label": "Martial Artist", "aliases": ["monk", "brawler", "unarmed fighter"] },
-        "mage": { "label": "Mage", "aliases": ["wizard", "sorcerer", "spellcaster"] },
-        "priest": { "label": "Priest", "aliases": ["cleric", "religious"] },
-        "rogue": { "label": "Rogue", "aliases": ["thief", "scoundrel"] },
-        "ranger": { "label": "Ranger", "aliases": ["hunter", "scout"] },
-        "noble": { "label": "Noble", "aliases": ["aristocrat", "royal"] },
-        "guard": { "label": "Guard", "aliases": ["watchman", "sentry"] },
-        "commoner": { "label": "Commoner", "aliases": ["civilian"] },
-        "artisan": { "label": "Artisan", "aliases": ["craftsperson"] },
-        "scholar": { "label": "Scholar", "aliases": ["academic", "researcher"] },
-        "performer": { "label": "Performer", "aliases": ["bard", "entertainer"] }
+        "warrior": {
+          "label": "Warrior",
+          "aliases": [
+            "fighter",
+            "soldier"
+          ]
+        },
+        "martial_artist": {
+          "label": "Martial Artist",
+          "aliases": [
+            "monk",
+            "brawler",
+            "unarmed fighter"
+          ]
+        },
+        "mage": {
+          "label": "Mage",
+          "aliases": [
+            "wizard",
+            "sorcerer",
+            "spellcaster"
+          ]
+        },
+        "priest": {
+          "label": "Priest",
+          "aliases": [
+            "cleric",
+            "religious"
+          ]
+        },
+        "rogue": {
+          "label": "Rogue",
+          "aliases": [
+            "thief",
+            "scoundrel"
+          ]
+        },
+        "ranger": {
+          "label": "Ranger",
+          "aliases": [
+            "hunter",
+            "scout"
+          ]
+        },
+        "noble": {
+          "label": "Noble",
+          "aliases": [
+            "aristocrat",
+            "royal"
+          ]
+        },
+        "guard": {
+          "label": "Guard",
+          "aliases": [
+            "watchman",
+            "sentry"
+          ]
+        },
+        "commoner": {
+          "label": "Commoner",
+          "aliases": [
+            "civilian"
+          ]
+        },
+        "artisan": {
+          "label": "Artisan",
+          "aliases": [
+            "craftsperson"
+          ]
+        },
+        "scholar": {
+          "label": "Scholar",
+          "aliases": [
+            "academic",
+            "researcher"
+          ]
+        },
+        "performer": {
+          "label": "Performer",
+          "aliases": [
+            "bard",
+            "entertainer"
+          ]
+        }
       }
     },
     "equipment": {
       "label": "Equipment",
       "maximumTags": 8,
       "values": {
-        "unarmed": { "label": "Unarmed", "aliases": ["bare hands"] },
-        "sword": { "label": "Sword", "aliases": ["blade"] },
-        "axe": { "label": "Axe", "aliases": [] },
-        "spear": { "label": "Spear", "aliases": ["polearm"] },
-        "bow": { "label": "Bow", "aliases": ["longbow", "shortbow"] },
-        "crossbow": { "label": "Crossbow", "aliases": [] },
-        "dagger": { "label": "Dagger", "aliases": ["knife"] },
-        "staff": { "label": "Staff", "aliases": ["quarterstaff"] },
-        "wand": { "label": "Wand", "aliases": [] },
-        "shield": { "label": "Shield", "aliases": [] },
-        "spellbook": { "label": "Spellbook", "aliases": ["magic book"] },
-        "tools": { "label": "Tools", "aliases": ["toolkit"] }
+        "unarmed": {
+          "label": "Unarmed",
+          "aliases": [
+            "bare hands"
+          ]
+        },
+        "sword": {
+          "label": "Sword",
+          "aliases": [
+            "blade"
+          ]
+        },
+        "axe": {
+          "label": "Axe",
+          "aliases": []
+        },
+        "spear": {
+          "label": "Spear",
+          "aliases": [
+            "polearm"
+          ]
+        },
+        "bow": {
+          "label": "Bow",
+          "aliases": [
+            "longbow",
+            "shortbow"
+          ]
+        },
+        "crossbow": {
+          "label": "Crossbow",
+          "aliases": []
+        },
+        "dagger": {
+          "label": "Dagger",
+          "aliases": [
+            "knife"
+          ]
+        },
+        "staff": {
+          "label": "Staff",
+          "aliases": [
+            "quarterstaff"
+          ]
+        },
+        "wand": {
+          "label": "Wand",
+          "aliases": [
+            "glowing_wand"
+          ]
+        },
+        "shield": {
+          "label": "Shield",
+          "aliases": []
+        },
+        "spellbook": {
+          "label": "Spellbook",
+          "aliases": [
+            "magic book"
+          ]
+        },
+        "tools": {
+          "label": "Tools",
+          "aliases": [
+            "toolkit"
+          ]
+        }
       }
     },
     "armor": {
       "label": "Armor",
       "maximumTags": 2,
       "values": {
-        "unarmored": { "label": "Unarmored", "aliases": ["no armor"] },
-        "light_armor": { "label": "Light Armor", "aliases": ["leather armor"] },
-        "medium_armor": { "label": "Medium Armor", "aliases": ["mail"] },
-        "heavy_armor": { "label": "Heavy Armor", "aliases": ["plate armor"] }
+        "unarmored": {
+          "label": "Unarmored",
+          "aliases": [
+            "no armor"
+          ]
+        },
+        "light_armor": {
+          "label": "Light Armor",
+          "aliases": [
+            "leather armor",
+            "leather_armor"
+          ]
+        },
+        "medium_armor": {
+          "label": "Medium Armor",
+          "aliases": [
+            "mail"
+          ]
+        },
+        "heavy_armor": {
+          "label": "Heavy Armor",
+          "aliases": [
+            "plate armor"
+          ]
+        }
       }
     },
     "clothing": {
       "label": "Clothing",
       "maximumTags": 5,
       "values": {
-        "robes": { "label": "Robes", "aliases": ["robe"] },
-        "uniform": { "label": "Uniform", "aliases": [] },
-        "travel_clothes": { "label": "Travel Clothes", "aliases": ["traveler"] },
-        "formal_clothes": { "label": "Formal Clothes", "aliases": ["finery"] },
-        "work_clothes": { "label": "Work Clothes", "aliases": ["workwear"] },
-        "cloak": { "label": "Cloak", "aliases": ["cape"] },
-        "hood": { "label": "Hood", "aliases": ["hooded"] }
+        "robes": {
+          "label": "Robes",
+          "aliases": [
+            "robe"
+          ]
+        },
+        "uniform": {
+          "label": "Uniform",
+          "aliases": []
+        },
+        "travel_clothes": {
+          "label": "Travel Clothes",
+          "aliases": [
+            "traveler"
+          ]
+        },
+        "formal_clothes": {
+          "label": "Formal Clothes",
+          "aliases": [
+            "finery"
+          ]
+        },
+        "work_clothes": {
+          "label": "Work Clothes",
+          "aliases": [
+            "workwear"
+          ]
+        },
+        "cloak": {
+          "label": "Cloak",
+          "aliases": [
+            "cape"
+          ]
+        },
+        "hood": {
+          "label": "Hood",
+          "aliases": [
+            "hooded"
+          ]
+        }
       }
     },
     "magic_theme": {
       "label": "Magic Theme",
       "maximumTags": 5,
       "values": {
-        "arcane": { "label": "Arcane", "aliases": [] },
-        "divine": { "label": "Divine", "aliases": ["holy"] },
-        "primal": { "label": "Primal", "aliases": ["nature magic"] },
-        "occult": { "label": "Occult", "aliases": ["esoteric"] },
-        "qi": { "label": "Qi", "aliases": ["ki", "inner energy"] },
-        "healing": { "label": "Healing", "aliases": ["restoration"] },
-        "necromancy": { "label": "Necromancy", "aliases": ["death magic"] },
-        "teleportation": { "label": "Teleportation", "aliases": ["portal"] }
+        "arcane": {
+          "label": "Arcane",
+          "aliases": []
+        },
+        "divine": {
+          "label": "Divine",
+          "aliases": [
+            "holy"
+          ]
+        },
+        "primal": {
+          "label": "Primal",
+          "aliases": [
+            "nature magic"
+          ]
+        },
+        "occult": {
+          "label": "Occult",
+          "aliases": [
+            "esoteric"
+          ]
+        },
+        "qi": {
+          "label": "Qi",
+          "aliases": [
+            "ki",
+            "inner energy"
+          ]
+        },
+        "healing": {
+          "label": "Healing",
+          "aliases": [
+            "restoration"
+          ]
+        },
+        "necromancy": {
+          "label": "Necromancy",
+          "aliases": [
+            "death magic"
+          ]
+        },
+        "teleportation": {
+          "label": "Teleportation",
+          "aliases": [
+            "portal"
+          ]
+        }
       }
     },
     "element": {
       "label": "Element",
       "maximumTags": 4,
       "values": {
-        "air": { "label": "Air", "aliases": ["wind"] },
-        "earth": { "label": "Earth", "aliases": ["stone"] },
-        "fire": { "label": "Fire", "aliases": ["flame"] },
-        "water": { "label": "Water", "aliases": ["wave"] },
-        "cold": { "label": "Cold", "aliases": ["ice", "frost"] },
-        "lightning": { "label": "Lightning", "aliases": ["electricity", "storm"] },
-        "light": { "label": "Light", "aliases": ["radiant"] },
-        "shadow": { "label": "Shadow", "aliases": ["darkness"] }
+        "air": {
+          "label": "Air",
+          "aliases": [
+            "wind"
+          ]
+        },
+        "earth": {
+          "label": "Earth",
+          "aliases": [
+            "stone"
+          ]
+        },
+        "fire": {
+          "label": "Fire",
+          "aliases": [
+            "flame",
+            "Fire magic",
+            "fire_element",
+            "fire_projectiles"
+          ]
+        },
+        "water": {
+          "label": "Water",
+          "aliases": [
+            "wave"
+          ]
+        },
+        "cold": {
+          "label": "Cold",
+          "aliases": [
+            "ice",
+            "frost"
+          ]
+        },
+        "lightning": {
+          "label": "Lightning",
+          "aliases": [
+            "electricity",
+            "storm"
+          ]
+        },
+        "light": {
+          "label": "Light",
+          "aliases": [
+            "radiant"
+          ]
+        },
+        "shadow": {
+          "label": "Shadow",
+          "aliases": [
+            "darkness"
+          ]
+        }
       }
     },
     "pose": {
       "label": "Pose",
       "maximumTags": 3,
       "values": {
-        "neutral": { "label": "Neutral", "aliases": ["standing"] },
-        "combat": { "label": "Combat", "aliases": ["fighting", "action pose"] },
-        "casting": { "label": "Casting", "aliases": ["spellcasting"] },
-        "seated": { "label": "Seated", "aliases": ["sitting"] },
-        "mounted": { "label": "Mounted", "aliases": ["riding"] },
-        "flying": { "label": "Flying", "aliases": ["airborne"] }
+        "neutral": {
+          "label": "Neutral",
+          "aliases": [
+            "standing"
+          ]
+        },
+        "combat": {
+          "label": "Combat",
+          "aliases": [
+            "fighting",
+            "action pose",
+            "combat_stance"
+          ]
+        },
+        "casting": {
+          "label": "Casting",
+          "aliases": [
+            "spellcasting"
+          ]
+        },
+        "seated": {
+          "label": "Seated",
+          "aliases": [
+            "sitting"
+          ]
+        },
+        "mounted": {
+          "label": "Mounted",
+          "aliases": [
+            "riding"
+          ]
+        },
+        "flying": {
+          "label": "Flying",
+          "aliases": [
+            "airborne"
+          ]
+        }
       }
     },
     "framing": {
       "label": "Framing",
       "maximumTags": 2,
       "values": {
-        "headshot": { "label": "Headshot", "aliases": ["face"] },
-        "bust": { "label": "Bust", "aliases": ["shoulders"] },
-        "half_body": { "label": "Half Body", "aliases": ["waist up"] },
-        "full_body": { "label": "Full Body", "aliases": ["whole character"] },
-        "wide_scene": { "label": "Wide Scene", "aliases": ["landscape view"] },
-        "token_ready": { "label": "Token Ready", "aliases": ["isolated character"] }
+        "headshot": {
+          "label": "Headshot",
+          "aliases": [
+            "face"
+          ]
+        },
+        "bust": {
+          "label": "Bust",
+          "aliases": [
+            "shoulders"
+          ]
+        },
+        "half_body": {
+          "label": "Half Body",
+          "aliases": [
+            "waist up"
+          ]
+        },
+        "full_body": {
+          "label": "Full Body",
+          "aliases": [
+            "whole character"
+          ]
+        },
+        "wide_scene": {
+          "label": "Wide Scene",
+          "aliases": [
+            "landscape view"
+          ]
+        },
+        "token_ready": {
+          "label": "Token Ready",
+          "aliases": [
+            "isolated character"
+          ]
+        }
       }
     },
     "background": {
       "label": "Background",
       "maximumTags": 3,
       "values": {
-        "transparent": { "label": "Transparent", "aliases": ["no background"] },
-        "plain": { "label": "Plain", "aliases": ["simple background"] },
-        "detailed": { "label": "Detailed", "aliases": ["complex background"] },
-        "indoor": { "label": "Indoor", "aliases": ["interior"] },
-        "outdoor": { "label": "Outdoor", "aliases": ["exterior"] }
+        "transparent": {
+          "label": "Transparent",
+          "aliases": [
+            "no background"
+          ]
+        },
+        "plain": {
+          "label": "Plain",
+          "aliases": [
+            "simple background"
+          ]
+        },
+        "detailed": {
+          "label": "Detailed",
+          "aliases": [
+            "complex background"
+          ]
+        },
+        "indoor": {
+          "label": "Indoor",
+          "aliases": [
+            "interior"
+          ]
+        },
+        "outdoor": {
+          "label": "Outdoor",
+          "aliases": [
+            "exterior"
+          ]
+        }
       }
     },
     "mood": {
       "label": "Mood",
       "maximumTags": 3,
       "values": {
-        "friendly": { "label": "Friendly", "aliases": ["welcoming"] },
-        "stern": { "label": "Stern", "aliases": ["serious"] },
-        "threatening": { "label": "Threatening", "aliases": ["hostile"] },
-        "mysterious": { "label": "Mysterious", "aliases": ["enigmatic"] },
-        "regal": { "label": "Regal", "aliases": ["majestic"] },
-        "frightened": { "label": "Frightened", "aliases": ["afraid"] },
-        "cheerful": { "label": "Cheerful", "aliases": ["happy"] }
+        "friendly": {
+          "label": "Friendly",
+          "aliases": [
+            "welcoming"
+          ]
+        },
+        "stern": {
+          "label": "Stern",
+          "aliases": [
+            "serious"
+          ]
+        },
+        "threatening": {
+          "label": "Threatening",
+          "aliases": [
+            "hostile"
+          ]
+        },
+        "mysterious": {
+          "label": "Mysterious",
+          "aliases": [
+            "enigmatic"
+          ]
+        },
+        "regal": {
+          "label": "Regal",
+          "aliases": [
+            "majestic"
+          ]
+        },
+        "frightened": {
+          "label": "Frightened",
+          "aliases": [
+            "afraid"
+          ]
+        },
+        "cheerful": {
+          "label": "Cheerful",
+          "aliases": [
+            "happy"
+          ]
+        }
       }
     },
     "dominant_color": {
       "label": "Dominant Color",
       "maximumTags": 4,
       "values": {
-        "black": { "label": "Black", "aliases": [] },
-        "white": { "label": "White", "aliases": [] },
-        "gray": { "label": "Gray", "aliases": ["grey"] },
-        "red": { "label": "Red", "aliases": [] },
-        "orange": { "label": "Orange", "aliases": [] },
-        "yellow": { "label": "Yellow", "aliases": ["gold"] },
-        "green": { "label": "Green", "aliases": [] },
-        "blue": { "label": "Blue", "aliases": [] },
-        "purple": { "label": "Purple", "aliases": ["violet"] },
-        "brown": { "label": "Brown", "aliases": [] }
+        "black": {
+          "label": "Black",
+          "aliases": []
+        },
+        "white": {
+          "label": "White",
+          "aliases": []
+        },
+        "gray": {
+          "label": "Gray",
+          "aliases": [
+            "grey"
+          ]
+        },
+        "red": {
+          "label": "Red",
+          "aliases": []
+        },
+        "orange": {
+          "label": "Orange",
+          "aliases": []
+        },
+        "yellow": {
+          "label": "Yellow",
+          "aliases": [
+            "gold"
+          ]
+        },
+        "green": {
+          "label": "Green",
+          "aliases": []
+        },
+        "blue": {
+          "label": "Blue",
+          "aliases": []
+        },
+        "purple": {
+          "label": "Purple",
+          "aliases": [
+            "violet"
+          ]
+        },
+        "brown": {
+          "label": "Brown",
+          "aliases": []
+        }
+      }
+    },
+    "details": {
+      "label": "Details",
+      "maximumTags": 3,
+      "values": {
+        "blood": {
+          "label": "blood",
+          "aliases": [
+            "blood_splatters"
+          ],
+          "implies": []
+        },
+        "tattoo": {
+          "label": "Tattoo",
+          "aliases": [
+            "face_paint",
+            "war_paint"
+          ],
+          "implies": []
+        },
+        "blindfold": {
+          "label": "blindfold",
+          "aliases": [],
+          "implies": []
+        }
       }
     }
   }

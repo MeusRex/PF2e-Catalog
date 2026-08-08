@@ -13,7 +13,7 @@ function buildPrompt(basePrompt, taxonomy, previousError = null) {
   const repair = previousError
     ? `\n\nThe previous response was invalid: ${previousError}. Return a corrected response.`
     : "";
-  return `${basePrompt}\n\nControlled taxonomy:\n${taxonomyForPrompt(taxonomy)}${repair}`;
+  return `${basePrompt}\n\nControlled taxonomy:\n${taxonomyForPrompt(taxonomy)}\n\nSelect the most specific visually supported canonical tag. Aliases are context only; return canonical IDs. Do not repeat implied parent tags: the application derives them deterministically.${repair}`;
 }
 
 export async function classifyImage({ imageBuffer, taxonomy, config, client }) {

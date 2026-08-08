@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
 export function buildSearchDocument(image) {
-  const tagText = image.tags
+  const tagText = (image.effective_tags ?? image.tags)
     .map((item) => `${item.category.replaceAll("_", " ")}: ${item.display_name}`)
     .join(". ");
   const features = Array.isArray(image.visible_features) ? image.visible_features.join(", ") : "";

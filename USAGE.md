@@ -165,8 +165,12 @@ The browser interface supports:
 - Low-confidence and unclassified review queues
 - Failed-classification retry
 - Unknown-tag suggestion triage
+- Taxonomy editing, aliases, descriptions, and broader-tag relationships
+- Suggestion mapping to existing or newly created canonical tags
 
 Saving an image in the review editor makes its corrected caption and tags authoritative. Later AI classifications remain in the audit history but do not overwrite human-reviewed metadata.
+
+Use the **Taxonomy** page to define aliases and `implies` relationships. An image tagged with a narrow tag automatically matches filters for every broader tag it implies, and inherited tags are included in Foundry exports. Taxonomy changes increment its version and invalidate existing semantic vectors, so run `npm run catalog -- embed` after wrangling changes.
 
 Stop the local server with Ctrl+C.
 

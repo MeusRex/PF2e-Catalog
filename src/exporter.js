@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { effectiveTags } from "./taxonomy.js";
 
 const schemaSource = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "foundry", "catalog.schema.json");
 
@@ -75,7 +76,7 @@ export function exportFoundryCatalog({ database, taxonomy, config, generatedAt =
         thumbnail: foundryPath(config.foundry.assetBasePath, "thumbnails", thumbnailName),
         filename: image.filename,
         caption: image.caption ?? "",
-        tags: tagsByCategory(image.tags),
+        tags: tagsByCategory(effectiveTags(taxonomy, image.tags)),
         reviewStatus: image.review_status,
         width: image.width,
         height: image.height,

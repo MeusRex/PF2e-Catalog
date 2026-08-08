@@ -16,6 +16,7 @@
     <nav class="topnav" aria-label="Catalog sections">
       <a href="/">Gallery</a>
       <a class="active" href="/review">Review queue</a>
+      <a href="/taxonomy">Taxonomy</a>
     </nav>
   </header>
 
@@ -85,5 +86,15 @@
       <div id="suggestion-list" class="queue-list"></div>
     </section>
   </main>
+  <dialog id="suggestion-dialog" class="small-dialog">
+    <form id="suggestion-form">
+      <div class="editor-title"><div><p class="eyebrow">Suggested concept</p><h2 id="suggestion-dialog-title">Map suggestion</h2></div><button id="close-suggestion-dialog" class="icon-button" type="button" aria-label="Close">×</button></div>
+      <label>Action<select id="suggestion-action"><option value="existing">Map to existing tag</option><option value="create">Create canonical tag</option></select></label>
+      <div id="existing-tag-fields"><label>Canonical tag<select id="suggestion-target"></select></label><label class="check-row"><input id="suggestion-alias" type="checkbox" checked> Add the suggested wording as an alias</label></div>
+      <div id="new-tag-fields" hidden><label>Category<select id="suggestion-category"></select></label><label>Stable ID<input id="suggestion-id" pattern="[a-z][a-z0-9_]*"></label><label>Display label<input id="suggestion-label"></label><label>Aliases<input id="suggestion-aliases" placeholder="comma, separated"></label><label>Broader tags<select id="suggestion-implies" multiple size="6"></select></label></div>
+      <label class="check-row"><input id="suggestion-apply" type="checkbox" checked> Apply the canonical tag to this image</label>
+      <div class="editor-actions"><button class="primary" type="submit">Confirm mapping</button></div>
+    </form>
+  </dialog>
 </body>
 </html>

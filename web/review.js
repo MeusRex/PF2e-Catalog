@@ -9,7 +9,15 @@ const elements = {
   failures: document.querySelector("#failure-list"),
   suggestionStatus: document.querySelector("#suggestion-status"),
   suggestions: document.querySelector("#suggestion-list"),
+  suggestionDialog: document.querySelector("#suggestion-dialog"),
+  suggestionForm: document.querySelector("#suggestion-form"),
+  suggestionAction: document.querySelector("#suggestion-action"),
+  suggestionTarget: document.querySelector("#suggestion-target"),
+  suggestionCategory: document.querySelector("#suggestion-category"),
+  suggestionImplies: document.querySelector("#suggestion-implies"),
 };
+let taxonomy = null;
+let activeSuggestion = null;
 
 async function api(url, options) {
   const response = await fetch(url, options);
@@ -204,8 +212,8 @@ function suggestionRow(item) {
   if (item.status === "pending") {
     const handled = document.createElement("button");
     handled.type = "button";
-    handled.textContent = "Mark handled";
-    handled.addEventListener("click", () => setSuggestionStatus(item, "mapped"));
+    handled.textContent = "Handle suggestion";
+    handled.addEventListener("click", () => openSuggestion(item));
     const reject = document.createElement("button");
     reject.type = "button";
     reject.className = "danger-button";
@@ -221,6 +229,71 @@ function suggestionRow(item) {
   }
   row.append(queueImage(item), content, actions);
   return row;
+}
+
+function taxonomyTagOptions() {
+  return Object.entries(taxonomy.categories).flatMap(([categoryId, category]) =>
+    Object.entries(category.values).map(([tagId, tag]) => ({ value: `${categoryId}:${tagId}`, label: `${category.label} · ${tag.label}`,
+      names: [tagId.replaceAll("_", " "), tag.label, ...(tag.aliases ?? [])].map((name) => name.toLocaleLowerCase()) })));
+}
+
+function slug(value) {
+  return value.toLocaleLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+async function openSuggestion(item) {
+  activeSuggestion = item;
+  if (!taxonomy) taxonomy = await api("/api/taxonomy");
+  const options = taxonomyTagOptions();
+  const makeOption = (entry) => { const option = document.createElement("option"); option.value = entry.value; option.textContent = entry.label; return option; };
+  elements.suggestionTarget.replaceChildren(...options.map(makeOption));
+  const suggestedName = item.label.trim().toLocaleLowerCase();
+  const preferred = options.find((entry) => entry.names.includes(suggestedName))
+    ?? options.find((entry) => entry.names.some((name) => name.includes(suggestedName) || suggestedName.includes(name)));
+  if (preferred) elements.suggestionTarget.value = preferred.value;
+  elements.suggestionImplies.replaceChildren(...options.map(makeOption));
+  elements.suggestionCategory.replaceChildren(...Object.entries(taxonomy.categories).map(([id, category]) => {
+    const option = document.createElement("option"); option.value = id; option.textContent = category.label; return option;
+  }));
+  if (taxonomy.categories[item.suggested_category]) elements.suggestionCategory.value = item.suggested_category;
+  document.querySelector("#suggestion-dialog-title").textContent = item.label;
+  document.querySelector("#suggestion-id").value = slug(item.label);
+  document.querySelector("#suggestion-label").value = item.label;
+  document.querySelector("#suggestion-aliases").value = "";
+  elements.suggestionAction.value = "existing";
+  toggleSuggestionAction();
+  elements.suggestionDialog.showModal();
+}
+
+function toggleSuggestionAction() {
+  const create = elements.suggestionAction.value === "create";
+  document.querySelector("#existing-tag-fields").hidden = create;
+  document.querySelector("#new-tag-fields").hidden = !create;
+}
+
+async function mapSuggestion(event) {
+  event.preventDefault();
+  const create = elements.suggestionAction.value === "create";
+  let body;
+  if (create) {
+    body = { create: { category: elements.suggestionCategory.value, id: document.querySelector("#suggestion-id").value,
+      label: document.querySelector("#suggestion-label").value,
+      aliases: document.querySelector("#suggestion-aliases").value.split(",").map((value) => value.trim()).filter(Boolean),
+      implies: [...elements.suggestionImplies.selectedOptions].map((option) => option.value) } };
+  } else {
+    const [category, tag] = elements.suggestionTarget.value.split(":");
+    body = { category, tag, addAlias: document.querySelector("#suggestion-alias").checked };
+  }
+  body.applyToImage = document.querySelector("#suggestion-apply").checked;
+  try {
+    await api(`/api/review/suggestions/${activeSuggestion.id}/map`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
+    });
+    taxonomy = null;
+    elements.suggestionDialog.close();
+    showMessage(`Mapped “${activeSuggestion.label}” successfully.`);
+    await Promise.all([loadSummary(), loadSuggestions()]);
+  } catch (error) { showMessage(error.message, true); }
 }
 
 async function loadSuggestions() {
@@ -249,4 +322,7 @@ elements.refresh.addEventListener("click", loadAll);
 elements.jobStatus.addEventListener("change", loadJobs);
 elements.runOneJob.addEventListener("click", runOneJob);
 elements.suggestionStatus.addEventListener("change", loadSuggestions);
+elements.suggestionAction.addEventListener("change", toggleSuggestionAction);
+elements.suggestionForm.addEventListener("submit", mapSuggestion);
+document.querySelector("#close-suggestion-dialog").addEventListener("click", () => elements.suggestionDialog.close());
 loadAll();

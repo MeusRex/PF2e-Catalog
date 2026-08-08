@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taxonomy · Fantasy Image Catalog</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/taxonomy.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">Tag wrangling</p><h1>Taxonomy</h1></div>
+    <nav class="topnav" aria-label="Catalog sections">
+      <a href="/">Gallery</a><a href="/review">Review queue</a><a class="active" href="/taxonomy">Taxonomy</a>
+    </nav>
+  </header>
+  <main class="review-main taxonomy-main">
+    <div id="taxonomy-message" class="message" hidden></div>
+    <div class="section-heading">
+      <div><p class="eyebrow">Canonical vocabulary</p><h2>Categories and tags <span id="taxonomy-version" class="count-badge"></span></h2></div>
+      <div class="heading-actions"><input id="taxonomy-search" type="search" placeholder="Filter tags"><button id="add-category" type="button">Add category</button><button id="add-tag" class="primary" type="button">Add tag</button></div>
+    </div>
+    <p class="section-help">Aliases are alternate names. “Implies” links a narrower tag to broader tags, so filtering for a broader tag also finds its narrower descendants.</p>
+    <div id="taxonomy-list" class="taxonomy-list"></div>
+  </main>
+
+  <dialog id="tag-dialog" class="small-dialog">
+    <form id="tag-form">
+      <div class="editor-title"><div><p class="eyebrow">Canonical tag</p><h2 id="tag-dialog-title">Add tag</h2></div><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></div>
+      <label>Category<select id="tag-category" required></select></label>
+      <label>Stable ID<input id="tag-id" required pattern="[a-z][a-z0-9_]*" placeholder="fire_magic"></label>
+      <label>Display label<input id="tag-label" required placeholder="Fire Magic"></label>
+      <label>Aliases<textarea id="tag-aliases" rows="2" placeholder="pyromancy, flame magic"></textarea></label>
+      <label>Description<textarea id="tag-description" rows="3" placeholder="Optional guidance for the vision model"></textarea></label>
+      <fieldset><legend>Implies broader tags</legend><input id="implies-search" type="search" placeholder="Find a parent tag"><div id="tag-implies" class="relationship-picker"></div></fieldset>
+      <div class="editor-actions"><button id="delete-tag" class="danger-button" type="button">Delete</button><button class="primary" type="submit">Save tag</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="category-dialog" class="small-dialog">
+    <form id="category-form">
+      <div class="editor-title"><div><p class="eyebrow">Taxonomy group</p><h2 id="category-dialog-title">Add category</h2></div><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></div>
+      <label>Stable ID<input id="category-id" required pattern="[a-z][a-z0-9_]*"></label>
+      <label>Display label<input id="category-label" required></label>
+      <label>Maximum tags per image<input id="category-maximum" type="number" min="1" required></label>
+      <div class="editor-actions"><button class="primary" type="submit">Save category</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="merge-dialog" class="small-dialog">
+    <form id="merge-form">
+      <div class="editor-title"><div><p class="eyebrow">Destructive migration</p><h2>Merge tag</h2></div><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></div>
+      <p id="merge-help" class="section-help"></p>
+      <label>Replacement tag<select id="merge-target" required></select></label>
+      <p class="queue-error">All assignments move to the replacement. The old label and aliases become aliases of the replacement.</p>
+      <div class="editor-actions"><button class="danger-button" type="submit">Merge permanently</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

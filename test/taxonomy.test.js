@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
-import { buildInferenceSchema, loadTaxonomy, normalizeInference } from "../src/taxonomy.js";
+import { buildInferenceSchema, impliedTagKeys, loadTaxonomy, normalizeInference, tagsMatchingFilter, taxonomyForPrompt, validateTaxonomy } from "../src/taxonomy.js";
 
 const taxonomy = loadTaxonomy(path.resolve("taxonomy/taxonomy.json"));
 
@@ -59,4 +59,37 @@ test("low-confidence tags remain observations rather than accepted tags", () => 
 
   assert.equal(normalized.acceptedTags.length, 0);
   assert.equal(normalized.observationTags.length, 1);
+});
+
+test("aliases and implications are described to the model and implication closure expands filters", () => {
+  const edited = structuredClone(taxonomy);
+  edited.categories.magic_theme.values.fire_magic = {
+    label: "Fire Magic",
+    aliases: ["pyromancy"],
+    description: "Visible supernatural flame or heat.",
+    implies: ["element:fire"],
+  };
+  validateTaxonomy(edited);
+  assert.deepEqual(impliedTagKeys(edited, "magic_theme", "fire_magic"), ["magic_theme:fire_magic", "element:fire"]);
+  assert.ok(tagsMatchingFilter(edited, "element", "fire").some((item) => item.category === "magic_theme" && item.tag === "fire_magic"));
+  const prompt = taxonomyForPrompt(edited);
+  assert.match(prompt, /Aliases: pyromancy/);
+  assert.match(prompt, /Implies: element:fire/);
+  assert.match(prompt, /Visible supernatural flame/);
+});
+
+test("taxonomy validation rejects missing targets, cycles, and duplicate aliases", () => {
+  const missing = structuredClone(taxonomy);
+  missing.categories.element.values.fire.implies = ["element:not_real"];
+  assert.throws(() => validateTaxonomy(missing), /missing tag/);
+
+  const cyclic = structuredClone(taxonomy);
+  cyclic.categories.element.values.fire.implies = ["element:cold"];
+  cyclic.categories.element.values.cold.implies = ["element:fire"];
+  assert.throws(() => validateTaxonomy(cyclic), /cycle/);
+
+  const duplicate = structuredClone(taxonomy);
+  duplicate.categories.element.values.fire.aliases.push("icy");
+  duplicate.categories.element.values.cold.aliases.push("icy");
+  assert.throws(() => validateTaxonomy(duplicate), /already used/);
 });

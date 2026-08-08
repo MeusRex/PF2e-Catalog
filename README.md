@@ -106,7 +106,9 @@ Open <http://127.0.0.1:8787> in a browser. The gallery provides:
 - Original-image previews served only for cataloged files
 - Caption and tag correction
 
-The **Review queue** page shows catalog health, images whose latest Ollama request failed, and model-suggested concepts that are not in the controlled taxonomy. Failed items can be retried after Ollama is available. Suggestions can be marked handled or rejected, but they never become canonical tags automatically.
+The **Review queue** page shows catalog health, images whose latest Ollama request failed, and model-suggested concepts that are not in the controlled taxonomy. Failed items can be retried after Ollama is available. A suggestion can be mapped to an existing tag, made an alias, or used to create a canonical tag, and the confirmed tag can be applied to its source image without replacing other tags.
+
+The **Taxonomy** page edits category labels and limits, creates and edits tags, manages aliases and descriptions, and links narrow tags to broader tags with `implies`. For example, `magic_theme:fire_magic` can imply `element:fire`; filtering for Fire then includes images explicitly tagged Fire Magic. Tags with assignments can be merged into another canonical tag. Every edit is validated for missing references, duplicate aliases, and relationship cycles, saved atomically, and increments the taxonomy version. Taxonomy edits invalidate semantic vectors; run `npm run catalog -- embed` afterward to rebuild them.
 
 It also displays persistent batch jobs. The **Process one ready job** control is useful for supervised testing; use `npm run catalog -- work` for unattended batches.
 

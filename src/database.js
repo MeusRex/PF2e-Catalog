@@ -1,6 +1,7 @@
 import path from "node:path";
 import Database from "better-sqlite3";
 import { cosineSimilarity, decodeVector, encodeVector } from "./embeddings.js";
+import { effectiveTags } from "./taxonomy.js";
 
 export class CatalogDatabase {
   constructor(databasePath) {
@@ -113,6 +114,11 @@ export class CatalogDatabase {
         PRIMARY KEY(image_id, model)
       );
 
+      CREATE TABLE IF NOT EXISTS app_metadata (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS idx_image_tags_image ON image_tags(image_id);
       CREATE INDEX IF NOT EXISTS idx_inference_lookup ON inference_runs(image_id, model, prompt_version, taxonomy_version, status);
       CREATE INDEX IF NOT EXISTS idx_classification_jobs_claim ON classification_jobs(status, available_at, id);
@@ -126,6 +132,9 @@ export class CatalogDatabase {
         tokenize = 'unicode61 remove_diacritics 2'
       );
     `);
+    const suggestionColumns = new Set(this.db.prepare("PRAGMA table_info(tag_suggestions)").all().map((column) => column.name));
+    if (!suggestionColumns.has("mapped_category")) this.db.exec("ALTER TABLE tag_suggestions ADD COLUMN mapped_category TEXT");
+    if (!suggestionColumns.has("mapped_tag")) this.db.exec("ALTER TABLE tag_suggestions ADD COLUMN mapped_tag TEXT");
   }
 
   upsertPreparedImage(image) {
@@ -228,14 +237,14 @@ export class CatalogDatabase {
     transaction();
   }
 
-  refreshSearchDocument(imageId) {
+  refreshSearchDocument(imageId, taxonomy = this.taxonomy) {
     const image = this.db.prepare(`
       SELECT filename, COALESCE(caption, '') AS caption, visible_features_json
       FROM images WHERE id = ?
     `).get(imageId);
     if (!image) return;
     const tags = this.db.prepare(`
-      SELECT tags.canonical_name, tags.display_name
+      SELECT tags.category, tags.canonical_name, tags.display_name
       FROM image_tags JOIN tags ON tags.id = image_tags.tag_id
       WHERE image_tags.image_id = ?
     `).all(imageId);
@@ -245,7 +254,13 @@ export class CatalogDatabase {
     } catch {
       visibleFeatures = [];
     }
-    const tagText = tags.flatMap((tag) => [tag.canonical_name.replaceAll("_", " "), tag.display_name]).join(" ");
+    const indexedTags = taxonomy
+      ? effectiveTags(taxonomy, tags.map((tag) => ({ category: tag.category, tag: tag.canonical_name })))
+      : tags.map((tag) => ({ category: tag.category, tag: tag.canonical_name, display_name: tag.display_name }));
+    const tagText = indexedTags.flatMap((tag) => {
+      const definition = taxonomy?.categories[tag.category]?.values?.[tag.tag];
+      return [tag.tag.replaceAll("_", " "), tag.display_name, ...(definition?.aliases ?? [])];
+    }).join(" ");
     this.db.prepare("DELETE FROM image_search WHERE image_id = ?").run(String(imageId));
     this.db.prepare(`
       INSERT INTO image_search (image_id, filename, caption, visible_features, tags)
@@ -253,11 +268,34 @@ export class CatalogDatabase {
     `).run(String(imageId), image.filename, image.caption, visibleFeatures.join(" "), tagText);
   }
 
-  rebuildSearchIndex() {
+  rebuildSearchIndex(taxonomy = this.taxonomy) {
     const transaction = this.db.transaction(() => {
       this.db.prepare("DELETE FROM image_search").run();
       const ids = this.db.prepare("SELECT id FROM images ORDER BY id").all();
-      for (const { id } of ids) this.refreshSearchDocument(id);
+      for (const { id } of ids) this.refreshSearchDocument(id, taxonomy);
+    });
+    transaction();
+  }
+
+  syncTaxonomy(taxonomy) {
+    this.taxonomy = taxonomy;
+    const signature = JSON.stringify(taxonomy);
+    const existingSignature = this.db.prepare("SELECT value FROM app_metadata WHERE key = 'taxonomy_search_signature'").get()?.value;
+    const update = this.db.prepare(`
+      INSERT INTO tags (display_name, taxonomy_version, category, canonical_name) VALUES (?, ?, ?, ?)
+      ON CONFLICT(category, canonical_name) DO UPDATE SET display_name = excluded.display_name,
+        taxonomy_version = excluded.taxonomy_version
+    `);
+    const transaction = this.db.transaction(() => {
+      for (const [categoryId, category] of Object.entries(taxonomy.categories)) {
+        for (const [tagId, tag] of Object.entries(category.values)) update.run(tag.label, taxonomy.version, categoryId, tagId);
+      }
+      if (existingSignature !== signature) {
+        this.rebuildSearchIndex(taxonomy);
+        this.db.prepare("DELETE FROM image_embeddings").run();
+        this.db.prepare(`INSERT INTO app_metadata (key, value) VALUES ('taxonomy_search_signature', ?)
+          ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(signature);
+      }
     });
     transaction();
   }
@@ -322,11 +360,12 @@ export class CatalogDatabase {
       parameters.push(...safeIds);
     }
     for (const item of tags) {
+      const matches = item.matches?.length ? item.matches : [item];
       conditions.push(`EXISTS (
         SELECT 1 FROM image_tags it_filter JOIN tags t_filter ON t_filter.id = it_filter.tag_id
-        WHERE it_filter.image_id = i.id AND t_filter.category = ? AND t_filter.canonical_name = ?
+        WHERE it_filter.image_id = i.id AND (${matches.map(() => "(t_filter.category = ? AND t_filter.canonical_name = ?)").join(" OR ")})
       )`);
-      parameters.push(item.category, item.tag);
+      for (const match of matches) parameters.push(match.category, match.tag);
     }
     const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
     const semanticOrder = rankedIds
@@ -402,6 +441,33 @@ export class CatalogDatabase {
       ORDER BY sha256
     `).all();
     return rows.map((row) => this.getImageSummary(row.id));
+  }
+
+  taxonomyUsage() {
+    return Object.fromEntries(this.db.prepare(`
+      SELECT tags.category || ':' || tags.canonical_name AS key, COUNT(DISTINCT image_tags.image_id) AS count
+      FROM tags LEFT JOIN image_tags ON image_tags.tag_id = tags.id GROUP BY tags.id
+    `).all().map((row) => [row.key, row.count]));
+  }
+
+  mergeTag(sourceCategory, sourceTag, targetCategory, targetTag) {
+    const source = this.db.prepare("SELECT id FROM tags WHERE category = ? AND canonical_name = ?").get(sourceCategory, sourceTag);
+    if (!source) return 0;
+    const target = this.db.prepare("SELECT id FROM tags WHERE category = ? AND canonical_name = ?").get(targetCategory, targetTag);
+    const transaction = this.db.transaction(() => {
+      let targetId = target?.id;
+      if (!targetId) throw new Error(`Target tag ${targetCategory}:${targetTag} has never been synchronized`);
+      const rows = this.db.prepare("SELECT * FROM image_tags WHERE tag_id = ?").all(source.id);
+      const insert = this.db.prepare(`INSERT OR IGNORE INTO image_tags
+        (image_id, tag_id, confidence, evidence, source, reviewed, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+      for (const row of rows) insert.run(row.image_id, targetId, row.confidence, row.evidence, row.source, row.reviewed, row.created_at);
+      this.db.prepare("DELETE FROM image_tags WHERE tag_id = ?").run(source.id);
+      this.db.prepare("DELETE FROM tags WHERE id = ?").run(source.id);
+      return new Set(rows.map((row) => row.image_id));
+    });
+    const affected = transaction();
+    for (const imageId of affected) this.refreshSearchDocument(imageId);
+    return affected.size;
   }
 
   getImageSummary(imageId) {
@@ -585,7 +651,8 @@ export class CatalogDatabase {
     const total = this.db.prepare("SELECT COUNT(*) AS count FROM tag_suggestions WHERE status = ?").get(status).count;
     const items = this.db.prepare(`
       SELECT suggestion.id, suggestion.image_id, suggestion.label, suggestion.suggested_category,
-        suggestion.reason, suggestion.status, suggestion.created_at, images.filename, images.thumbnail_path
+        suggestion.reason, suggestion.status, suggestion.mapped_category, suggestion.mapped_tag,
+        suggestion.created_at, images.filename, images.thumbnail_path
       FROM tag_suggestions suggestion JOIN images ON images.id = suggestion.image_id
       WHERE suggestion.status = ? ORDER BY suggestion.created_at DESC LIMIT ? OFFSET ?
     `).all(status, safePageSize, (safePage - 1) * safePageSize);
@@ -600,6 +667,30 @@ export class CatalogDatabase {
       SELECT id, image_id, label, suggested_category, reason, status, created_at
       FROM tag_suggestions WHERE id = ?
     `).get(suggestionId);
+  }
+
+  mapTagSuggestion(suggestionId, category, tag, taxonomy, { applyToImage = true } = {}) {
+    if (!taxonomy.categories[category]?.values?.[tag]) throw new Error(`Unknown taxonomy tag: ${category}:${tag}`);
+    const suggestion = this.db.prepare("SELECT * FROM tag_suggestions WHERE id = ?").get(suggestionId);
+    if (!suggestion) throw new Error(`Suggestion ${suggestionId} does not exist`);
+    const transaction = this.db.transaction(() => {
+      if (applyToImage) {
+        const definition = taxonomy.categories[category].values[tag];
+        const tagId = this.db.prepare(`INSERT INTO tags (category, canonical_name, display_name, taxonomy_version)
+          VALUES (?, ?, ?, ?) ON CONFLICT(category, canonical_name) DO UPDATE SET display_name = excluded.display_name,
+          taxonomy_version = excluded.taxonomy_version RETURNING id`).get(category, tag, definition.label, taxonomy.version).id;
+        this.db.prepare("DELETE FROM image_tags WHERE image_id = ? AND tag_id = ?").run(suggestion.image_id, tagId);
+        this.db.prepare(`INSERT INTO image_tags
+          (image_id, tag_id, confidence, evidence, source, reviewed) VALUES (?, ?, 1, 'Mapped tag suggestion', 'human', 1)`)
+          .run(suggestion.image_id, tagId);
+      }
+      this.db.prepare(`UPDATE tag_suggestions SET status = 'mapped', mapped_category = ?, mapped_tag = ? WHERE id = ?`)
+        .run(category, tag, suggestionId);
+      this.db.prepare("DELETE FROM image_embeddings WHERE image_id = ?").run(suggestion.image_id);
+      this.refreshSearchDocument(suggestion.image_id, taxonomy);
+    });
+    transaction();
+    return this.db.prepare("SELECT * FROM tag_suggestions WHERE id = ?").get(suggestionId);
   }
 
   close() {

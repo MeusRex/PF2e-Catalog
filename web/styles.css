@@ -128,6 +128,20 @@ dialog::backdrop { background: rgb(0 0 0 / 75%); backdrop-filter: blur(5px); }
 .queue-actions { display: grid; justify-items: stretch; gap: .4rem; min-width: 9.5rem; }
 .queue-actions a { color: var(--accent); text-align: center; font-size: .78rem; }
 .queue-actions .danger-button { border-color: #7b3f36; color: var(--danger); }
+.taxonomy-list { display: grid; gap: 1rem; }
+.taxonomy-category { border: 1px solid var(--border); border-radius: .7rem; background: var(--panel); padding: .8rem; }
+.taxonomy-category h3 { margin: 0; }
+.taxonomy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .55rem; margin-top: .7rem; }
+.taxonomy-tag { display: flex; flex-direction: column; align-items: flex-start; gap: .25rem; border: 1px solid var(--border); border-radius: .55rem; background: var(--panel-raised); padding: .65rem; text-align: left; cursor: pointer; }
+.taxonomy-tag:hover { border-color: var(--accent); }
+.taxonomy-tag span, .taxonomy-tag small { color: var(--muted); }
+.small-dialog { width: min(680px, 94vw); height: auto; max-height: 90vh; overflow: auto; padding: 1rem; }
+.small-dialog form { display: grid; gap: .8rem; }
+.small-dialog form > label, .small-dialog fieldset { display: grid; gap: .3rem; }
+.small-dialog input:not([type="checkbox"]), .small-dialog select, .small-dialog textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--border); border-radius: .4rem; background: var(--panel-raised); padding: .5rem; }
+.relationship-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem; max-height: 220px; overflow: auto; margin-top: .5rem; }
+.relationship-picker label, .check-row { display: flex !important; align-items: center; gap: .45rem; }
+.editor-actions .danger-button { margin-right: auto; border: 1px solid #7b3f36; border-radius: .45rem; background: transparent; color: var(--danger); padding: .55rem .8rem; cursor: pointer; }
 .queue-empty { border: 1px dashed var(--border); border-radius: .65rem; padding: 1rem; color: var(--muted); text-align: center; }
 
 @media (max-width: 760px) {

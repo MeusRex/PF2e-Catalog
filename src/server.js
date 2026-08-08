@@ -9,6 +9,8 @@ const staticFiles = new Map([
   ["/app.js", ["app.js", "text/javascript; charset=utf-8"]],
   ["/review", ["review.html", "text/html; charset=utf-8"]],
   ["/review.js", ["review.js", "text/javascript; charset=utf-8"]],
+  ["/taxonomy", ["taxonomy.html", "text/html; charset=utf-8"]],
+  ["/taxonomy.js", ["taxonomy.js", "text/javascript; charset=utf-8"]],
   ["/styles.css", ["styles.css", "text/css; charset=utf-8"]],
 ]);
 
@@ -98,7 +100,34 @@ export function createCatalogServer(app) {
         return;
       }
       if (request.method === "GET" && url.pathname === "/api/taxonomy") {
-        sendJson(response, 200, app.taxonomy);
+        sendJson(response, 200, { ...app.taxonomy, usage: app.database.taxonomyUsage() });
+        return;
+      }
+      if (request.method === "POST" && url.pathname === "/api/taxonomy/categories") {
+        sendJson(response, 201, app.createCategory(await readJson(request)));
+        return;
+      }
+      const categoryRoute = url.pathname.match(/^\/api\/taxonomy\/categories\/([a-z][a-z0-9_]*)$/);
+      if (categoryRoute && request.method === "PATCH") {
+        sendJson(response, 200, app.updateCategory(categoryRoute[1], await readJson(request)));
+        return;
+      }
+      const tagRoute = url.pathname.match(/^\/api\/taxonomy\/categories\/([a-z][a-z0-9_]*)\/tags(?:\/([a-z][a-z0-9_]*))?$/);
+      if (tagRoute && request.method === "POST" && !tagRoute[2]) {
+        sendJson(response, 201, app.createTag(tagRoute[1], await readJson(request)));
+        return;
+      }
+      if (tagRoute && request.method === "PATCH" && tagRoute[2]) {
+        sendJson(response, 200, app.updateTag(tagRoute[1], tagRoute[2], await readJson(request)));
+        return;
+      }
+      if (tagRoute && request.method === "DELETE" && tagRoute[2]) {
+        sendJson(response, 200, app.deleteTag(tagRoute[1], tagRoute[2]));
+        return;
+      }
+      if (request.method === "POST" && url.pathname === "/api/taxonomy/merge") {
+        const body = await readJson(request);
+        sendJson(response, 200, app.mergeTag(body.sourceCategory, body.sourceTag, body.targetCategory, body.targetTag));
         return;
       }
       if (request.method === "GET" && url.pathname === "/api/review/failures") {
@@ -153,6 +182,28 @@ export function createCatalogServer(app) {
       if (suggestionRoute && request.method === "PATCH") {
         const body = await readJson(request);
         sendJson(response, 200, app.database.updateTagSuggestion(Number(suggestionRoute[1]), body.status));
+        return;
+      }
+      const suggestionMapRoute = url.pathname.match(/^\/api\/review\/suggestions\/(\d+)\/map$/);
+      if (suggestionMapRoute && request.method === "POST") {
+        const body = await readJson(request);
+        const suggestionId = Number(suggestionMapRoute[1]);
+        let { category, tag } = body;
+        if (body.create) {
+          category = body.create.category;
+          tag = body.create.id;
+          app.createTag(category, body.create);
+        } else if (body.addAlias) {
+          const suggestion = app.database.db.prepare("SELECT label FROM tag_suggestions WHERE id = ?").get(suggestionId);
+          if (!suggestion) throw new Error(`Suggestion ${suggestionId} does not exist`);
+          const definition = app.taxonomy.categories[category]?.values?.[tag];
+          if (!definition) throw new Error(`Unknown taxonomy tag: ${category}:${tag}`);
+          const aliases = [...(definition.aliases ?? [])];
+          if (suggestion.label.toLocaleLowerCase() !== definition.label.toLocaleLowerCase()
+            && !aliases.some((alias) => alias.toLocaleLowerCase() === suggestion.label.toLocaleLowerCase())) aliases.push(suggestion.label);
+          app.updateTag(category, tag, { aliases });
+        }
+        sendJson(response, 200, app.database.mapTagSuggestion(suggestionId, category, tag, app.taxonomy, { applyToImage: body.applyToImage !== false }));
         return;
       }
       if (request.method === "GET" && url.pathname === "/api/images") {
