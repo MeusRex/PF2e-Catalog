@@ -95,6 +95,7 @@ export class CatalogDatabase {
         attempts INTEGER NOT NULL DEFAULT 0,
         max_attempts INTEGER NOT NULL DEFAULT 3,
         re_evaluation INTEGER NOT NULL DEFAULT 0,
+        worker_pid INTEGER,
         available_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         started_at TEXT,
         completed_at TEXT,
@@ -138,6 +139,7 @@ export class CatalogDatabase {
     if (!suggestionColumns.has("mapped_tag")) this.db.exec("ALTER TABLE tag_suggestions ADD COLUMN mapped_tag TEXT");
     const jobColumns = new Set(this.db.prepare("PRAGMA table_info(classification_jobs)").all().map((column) => column.name));
     if (!jobColumns.has("re_evaluation")) this.db.exec("ALTER TABLE classification_jobs ADD COLUMN re_evaluation INTEGER NOT NULL DEFAULT 0");
+    if (!jobColumns.has("worker_pid")) this.db.exec("ALTER TABLE classification_jobs ADD COLUMN worker_pid INTEGER");
   }
 
   upsertPreparedImage(image) {
@@ -541,7 +543,7 @@ export class CatalogDatabase {
       this.db.prepare(`
         UPDATE classification_jobs SET status = 'pending', attempts = 0, max_attempts = ?, re_evaluation = ?,
           available_at = CURRENT_TIMESTAMP, started_at = NULL, completed_at = NULL,
-          last_error = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+          last_error = NULL, worker_pid = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?
       `).run(maxAttempts, reEvaluation ? 1 : 0, existing.id);
       return { job: this.getClassificationJob(existing.id), enqueued: true };
     }
@@ -560,7 +562,7 @@ export class CatalogDatabase {
     `).get(jobId);
   }
 
-  claimNextClassificationJob(versions = null) {
+  claimNextClassificationJob(versions = null, workerPid = process.pid) {
     const transaction = this.db.transaction(() => {
       const versionClause = versions
         ? "AND model = ? AND prompt_version = ? AND taxonomy_version = ?"
@@ -577,8 +579,9 @@ export class CatalogDatabase {
       if (!candidate) return null;
       this.db.prepare(`
         UPDATE classification_jobs SET status = 'running', attempts = attempts + 1,
-          started_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'
-      `).run(candidate.id);
+          started_at = CURRENT_TIMESTAMP, worker_pid = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND status = 'pending'
+      `).run(workerPid, candidate.id);
       return this.getClassificationJob(candidate.id);
     });
     return transaction.immediate();
@@ -587,7 +590,7 @@ export class CatalogDatabase {
   completeClassificationJob(jobId) {
     const result = this.db.prepare(`
       UPDATE classification_jobs SET status = 'completed', completed_at = CURRENT_TIMESTAMP,
-        last_error = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'running'
+        last_error = NULL, worker_pid = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'running'
     `).run(jobId);
     if (!result.changes) throw new Error(`Running classification job ${jobId} does not exist`);
     return this.getClassificationJob(jobId);
@@ -601,12 +604,12 @@ export class CatalogDatabase {
     if (shouldRetry) {
       this.db.prepare(`
         UPDATE classification_jobs SET status = 'pending', available_at = datetime('now', ?),
-          last_error = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+          last_error = ?, worker_pid = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?
       `).run(`+${delay} seconds`, String(error), jobId);
     } else {
       this.db.prepare(`
         UPDATE classification_jobs SET status = 'failed', completed_at = CURRENT_TIMESTAMP,
-          last_error = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+          last_error = ?, worker_pid = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?
       `).run(String(error), jobId);
     }
     return this.getClassificationJob(jobId);
@@ -616,9 +619,29 @@ export class CatalogDatabase {
     const safeMinutes = Math.max(1, Math.min(1440, Number(staleAfterMinutes) || 30));
     return this.db.prepare(`
       UPDATE classification_jobs SET status = 'pending', available_at = CURRENT_TIMESTAMP,
-        started_at = NULL, last_error = 'Recovered after interrupted worker', updated_at = CURRENT_TIMESTAMP
+        started_at = NULL, worker_pid = NULL, last_error = 'Recovered after interrupted worker', updated_at = CURRENT_TIMESTAMP
       WHERE status = 'running' AND datetime(started_at) <= datetime('now', ?)
     `).run(`-${safeMinutes} minutes`).changes;
+  }
+
+  recoverOrphanedClassificationJobs(isProcessAlive = (pid) => {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch (error) {
+      return error?.code === "EPERM";
+    }
+  }) {
+    const running = this.db.prepare("SELECT id, worker_pid FROM classification_jobs WHERE status = 'running'").all();
+    const orphaned = running.filter((job) => !job.worker_pid || !isProcessAlive(job.worker_pid));
+    if (!orphaned.length) return 0;
+    const update = this.db.prepare(`
+      UPDATE classification_jobs SET status = 'pending', available_at = CURRENT_TIMESTAMP,
+        started_at = NULL, worker_pid = NULL, last_error = 'Recovered after interrupted worker',
+        updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'running'
+    `);
+    const transaction = this.db.transaction(() => orphaned.reduce((count, job) => count + update.run(job.id).changes, 0));
+    return transaction();
   }
 
   listClassificationJobs({ status = "", page = 1, pageSize = 50 } = {}) {

@@ -147,6 +147,17 @@ test("image preparation and database insertion are idempotent", async () => {
     database.enqueueClassification(firstId, { ...versions, taxonomyVersion: "old-a" });
     database.enqueueClassification(firstId, { ...versions, taxonomyVersion: "old-b" });
     assert.ok(database.deletePendingClassificationJobs().removed >= 2);
+
+    const orphanVersions = { ...versions, taxonomyVersion: "orphan-owner" };
+    database.enqueueClassification(firstId, orphanVersions);
+    const orphanClaim = database.claimNextClassificationJob(orphanVersions, 111111);
+    assert.equal(orphanClaim.worker_pid, 111111);
+    assert.equal(database.recoverOrphanedClassificationJobs((pid) => pid === 222222), 1);
+    assert.equal(database.getClassificationJob(orphanClaim.id).status, "pending");
+    const liveClaim = database.claimNextClassificationJob(orphanVersions, 222222);
+    assert.equal(database.recoverOrphanedClassificationJobs((pid) => pid === 222222), 0);
+    assert.equal(database.getClassificationJob(liveClaim.id).status, "running");
+    database.completeClassificationJob(liveClaim.id);
   } finally {
     database.close();
   }

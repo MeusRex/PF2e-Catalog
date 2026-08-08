@@ -74,6 +74,7 @@ test("gallery API searches, serves cataloged images, and saves review edits", as
   try {
     const health = await fetch(`${baseUrl}/api/health`).then((response) => response.json());
     assert.equal(health.status, "ok");
+    assert.equal(health.recovered, 0);
     assert.equal(health.database.images, 1);
 
     const result = await fetch(`${baseUrl}/api/images?q=blue&tag=subject_type:character`).then((response) => response.json());

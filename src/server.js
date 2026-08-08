@@ -96,7 +96,8 @@ export function createCatalogServer(app) {
         return;
       }
       if (request.method === "GET" && url.pathname === "/api/health") {
-        sendJson(response, 200, { status: "ok", database: app.database.getStatus() });
+        const recovered = app.database.recoverOrphanedClassificationJobs();
+        sendJson(response, 200, { status: "ok", recovered, database: app.database.getStatus() });
         return;
       }
       if (request.method === "GET" && url.pathname === "/api/taxonomy") {

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.18",
+  "version": "1.0.21",
   "categories": {
     "subject_type": {
       "label": "Subject Type",
@@ -363,7 +363,8 @@
         "spear": {
           "label": "Spear",
           "aliases": [
-            "polearm"
+            "polearm",
+            "polearm weapon"
           ]
         },
         "bow": {
@@ -439,7 +440,8 @@
         "heavy_armor": {
           "label": "Heavy Armor",
           "aliases": [
-            "plate armor"
+            "plate armor",
+            "plate_armor"
           ]
         }
       }
@@ -507,7 +509,8 @@
         "primal": {
           "label": "Primal",
           "aliases": [
-            "nature magic"
+            "nature magic",
+            "nature_magic"
           ]
         },
         "occult": {
