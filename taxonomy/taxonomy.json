@@ -1,5 +1,5 @@
 {
-  "version": "1.0.21",
+  "version": "1.0.28",
   "categories": {
     "subject_type": {
       "label": "Subject Type",
@@ -163,6 +163,14 @@
           "aliases": [
             "uncertain"
           ]
+        },
+        "mermaid": {
+          "label": "Mermaid",
+          "aliases": [
+            "naga",
+            "aquatic"
+          ],
+          "implies": []
         }
       }
     },
@@ -247,6 +255,11 @@
           "aliases": [
             "tailed"
           ]
+        },
+        "hybrid": {
+          "label": "Hybrid",
+          "aliases": [],
+          "implies": []
         }
       }
     },
@@ -376,7 +389,9 @@
         },
         "crossbow": {
           "label": "Crossbow",
-          "aliases": []
+          "aliases": [
+            "pistol"
+          ]
         },
         "dagger": {
           "label": "Dagger",
@@ -411,6 +426,11 @@
           "aliases": [
             "toolkit"
           ]
+        },
+        "mechanical_limbs": {
+          "label": "Mechanical Limbs",
+          "aliases": [],
+          "implies": []
         }
       }
     },
@@ -489,6 +509,14 @@
           "aliases": [
             "hooded"
           ]
+        },
+        "nude_figure": {
+          "label": "Nude",
+          "aliases": [
+            "Naked",
+            "nude_figure"
+          ],
+          "implies": []
         }
       }
     },
@@ -503,7 +531,8 @@
         "divine": {
           "label": "Divine",
           "aliases": [
-            "holy"
+            "holy",
+            "halo"
           ]
         },
         "primal": {
